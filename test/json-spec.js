@@ -1,5 +1,5 @@
 var chai = require('chai')
-var templatejs = require('../lib/json')
+var templatize = require('../lib/json')
 var isNode
 
 if (process !== undefined) {
@@ -16,8 +16,8 @@ describe('templates', function () {
             hello: 'world',
             world: 'world'
         }
-        chai.expect(templatejs(main)).deep.eq(updated)
-        chai.expect(templatejs(main)).eq(main)
+        chai.expect(templatize(main)).deep.eq(updated)
+        chai.expect(templatize(main)).eq(main)
     })
 
     it('main templates only', function () {
@@ -29,7 +29,7 @@ describe('templates', function () {
             hello: 'world',
             world: 'world'
         }
-        chai.expect(templatejs(main)).deep.eq(updated)
+        chai.expect(templatize(main)).deep.eq(updated)
     })
 
     it('secondary', function () {
@@ -42,7 +42,7 @@ describe('templates', function () {
         var updated = {
             hello: 'world'
         }
-        chai.expect(templatejs(main, secondary)).deep.eq(updated)
+        chai.expect(templatize(main, secondary)).deep.eq(updated)
     })
 
     it('main only different start', function () {
@@ -54,7 +54,7 @@ describe('templates', function () {
             hello: 'world',
             world: 'world'
         }
-        chai.expect(templatejs(main, '{')).deep.eq(updated)
+        chai.expect(templatize(main, '{')).deep.eq(updated)
     })
     it('main only different start and end', function () {
         var main = {
@@ -65,7 +65,7 @@ describe('templates', function () {
             hello: 'hello world',
             world: 'world'
         }
-        chai.expect(templatejs(main, '${', '}')).deep.eq(updated)
+        chai.expect(templatize(main, '${', '}')).deep.eq(updated)
     })
     it('main, secondaries, start, and end', function () {
         var main = {
@@ -79,7 +79,7 @@ describe('templates', function () {
         var updated = {
             hello: 'hello world'
         }
-        chai.expect(templatejs(main, secondaries, '${', '}')).deep.eq(updated)
+        chai.expect(templatize(main, secondaries, '${', '}')).deep.eq(updated)
     })
     it('main only defaults', function () {
         var main = {
@@ -88,7 +88,7 @@ describe('templates', function () {
         var updated = {
             hello: 'hello world'
         }
-        chai.expect(templatejs(main)).deep.eq(updated)
+        chai.expect(templatize(main)).deep.eq(updated)
     })
 
     it('main defaults with start and end', function () {
@@ -98,7 +98,7 @@ describe('templates', function () {
         var updated = {
             hello: 'hello world'
         }
-        chai.expect(templatejs(main, '${', '}$')).deep.eq(updated)
+        chai.expect(templatize(main, '${', '}$')).deep.eq(updated)
     })
 
     it('multiple defaults', function () {
@@ -108,7 +108,7 @@ describe('templates', function () {
         var updated = {
             hello: 'hello world'
         }
-        chai.expect(templatejs(main)).deep.eq(updated)
+        chai.expect(templatize(main)).deep.eq(updated)
     })
 
     it('template reference', function() {
@@ -120,7 +120,7 @@ describe('templates', function () {
             hello: { covid19: 'sad world'},
             world: { covid19: 'sad world'}
         }
-        chai.expect(templatejs(main)).deep.eq(updated)
+        chai.expect(templatize(main)).deep.eq(updated)
     })
 
     it('template reference object in a string should replace string', function() {
@@ -132,7 +132,7 @@ describe('templates', function () {
             hello: { covid19: 'sad world'},
             world: { covid19: 'sad world'}
         }
-        chai.expect(templatejs(main)).deep.eq(updated)
+        chai.expect(templatize(main)).deep.eq(updated)
     })
 
     if (isNode) {
@@ -146,7 +146,7 @@ describe('templates', function () {
                 appName: 'my-app',
                 uri: 'my-app.example.com'
             }
-            chai.expect(templatejs(main)).deep.eq(updated)
+            chai.expect(templatize(main)).deep.eq(updated)
 
             removeVCAP()
         })
@@ -161,7 +161,7 @@ describe('templates', function () {
                 serviceName: 'my-service',
                 cert: 'my-cert'
             }
-            chai.expect(templatejs(main)).deep.eq(updated)
+            chai.expect(templatize(main)).deep.eq(updated)
 
             removeVCAP()
         })
@@ -179,7 +179,7 @@ describe('templates', function () {
                 env: process.env.NODE_ENV
             }
 
-            chai.expect(templatejs(main)).deep.eq(updated)
+            chai.expect(templatize(main)).deep.eq(updated)
 
             delete process.env.NODE_ENV
         })
@@ -243,13 +243,13 @@ function setVCAPEnv() {
         }]
     })
 
-    templatejs = require('../lib/json')
+    templatize = require('../lib/json')
 
     return function() {
         delete process.env.VCAP_APPLICATION
         delete process.env.VCAP_SERVICES
         delete require.cache[require.resolve('../lib/json')]
 
-        templatejs = require('../lib/json')
+        templatize = require('../lib/json')
     }
 }
