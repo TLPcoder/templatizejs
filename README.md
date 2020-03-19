@@ -64,8 +64,6 @@ single JSON object.
     
     // json === {
     //     fizzBuzz: 'FizzBuzz',
-    //     fizz: 'Fizz',
-    //     buzz: 'Buzz'
     // }
 ```
 
@@ -110,7 +108,5 @@ colon inside the template start and end characters.
     
     // json === {
     //     fizzBuzz: 'FizzBuzz',
-    //     fizz: 'Fizz',
-    //     buzz: 'Buzz'
     // }
 ```
