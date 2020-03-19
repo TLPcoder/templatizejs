@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/TLPcoder/templatejs"
+    "url": "https://github.com/TLPcoder/templatizejs"
   },
   "devDependencies": {
     "chai": "^4.2.0",
