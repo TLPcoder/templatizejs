@@ -1,5 +1,5 @@
 var chai = require('chai')
-var templatejs = require('../index')
+var templatejs = require('../lib/json')
 var isNode
 
 if (process !== undefined) {
@@ -7,6 +7,19 @@ if (process !== undefined) {
 }
 
 describe('templates', function () {
+    it('keep same ref', function () {
+        var main = {
+            hello: '{{world}}',
+            world: 'world'
+        }
+        var updated = {
+            hello: 'world',
+            world: 'world'
+        }
+        chai.expect(templatejs(main)).deep.eq(updated)
+        chai.expect(templatejs(main)).eq(main)
+    })
+
     it('main templates only', function () {
         var main = {
             hello: '{{world}}',
@@ -174,7 +187,7 @@ describe('templates', function () {
 })
 
 function setVCAPEnv() {
-    delete require.cache[require.resolve('../index')]
+    delete require.cache[require.resolve('../lib/json')]
 
     process.env.VCAP_APPLICATION = JSON.stringify({
         'application_id': 'fa05c1a9-0fc1-4fbd-bae1-139850dec7a3',
@@ -230,13 +243,13 @@ function setVCAPEnv() {
         }]
     })
 
-    templatejs = require('../index')
+    templatejs = require('../lib/json')
 
     return function() {
         delete process.env.VCAP_APPLICATION
         delete process.env.VCAP_SERVICES
-        delete require.cache[require.resolve('../index')]
+        delete require.cache[require.resolve('../lib/json')]
 
-        templatejs = require('../index')
+        templatejs = require('../lib/json')
     }
 }
