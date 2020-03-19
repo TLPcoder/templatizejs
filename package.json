@@ -6,6 +6,15 @@
   "scripts": {
     "test": "nyc --all --reporter=text --reporter=html --reporter=cobertura --reporter=text-summary --reporter=lcov mocha --exit --recursive ./test"
   },
+  "keywords": [
+    "templatize",
+    "template",
+    "replace",
+    "parser",
+    "parse",
+    "json",
+    "yaml"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
