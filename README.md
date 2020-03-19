@@ -104,7 +104,7 @@ colon inside the template start and end characters.
         fizzBuzz: '${fizz: Fizz}${buzz: ${Buzz: Buzz }}',
     }
 
-    templatize.json(json)
+    templatize.json(json, '${', '}')
     
     // json === {
     //     fizzBuzz: 'FizzBuzz',
