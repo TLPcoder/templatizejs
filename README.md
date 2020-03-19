@@ -5,7 +5,7 @@ structures and extend them through the use of templates. This module supports
 both browser and node usage. However templatejs is more useful for the node
 user at is lets you extend from the process object and vcap env variables.
 
-TemplateJS will supports YAML and will convert JSON and return a JSON object
+TemplateJS supports YAML and will convert JSON and return a JSON object
 with the templates resolved.
 
 ## FUTURE SUPPORT
