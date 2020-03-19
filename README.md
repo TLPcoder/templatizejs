@@ -81,7 +81,7 @@ are provided individually as arguments.
         buzz: 'Buzz'
     }
 
-    templateJS.json(json, '${', '})
+    templateJS.json(json, '${', '}')
     
     // json === {
     //     fizzBuzz: 'FizzBuzz',
