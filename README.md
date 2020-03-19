@@ -60,7 +60,7 @@ single JSON object.
         { buzz: 'Buzz' }
     ]
 
-    templatize.json(json)
+    templatize.json(json, secondaries)
     
     // json === {
     //     fizzBuzz: 'FizzBuzz',
