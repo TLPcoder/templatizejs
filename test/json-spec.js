@@ -126,11 +126,13 @@ describe('templates', function () {
     it('template reference object in a string should replace string', function() {
         var main = {
             hello: 'sad {{ world }}',
-            world: { covid19: 'sad world'}
+            world: { covid19: 'sad world'},
+            empty: null
         }
         var updated = {
             hello: { covid19: 'sad world'},
-            world: { covid19: 'sad world'}
+            world: { covid19: 'sad world'},
+            empty: null
         }
         chai.expect(templatize(main)).deep.eq(updated)
     })
