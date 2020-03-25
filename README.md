@@ -16,6 +16,8 @@ yaml
 file
 ...
 
+# JSON
+
 ## Intro
 
 At its simplest templatizejs can grab data from other areas of the JSON object.
@@ -35,7 +37,7 @@ create you own.
 
     templatize.json(json)
     
-    // json === {
+    // result === {
     //     fizzBuzz: 'FizzBuzz',
     //     fizz: 'Fizz',
     //     buzz: 'Buzz'
@@ -62,7 +64,7 @@ single JSON object.
 
     templatize.json(json, secondaries)
     
-    // json === {
+    // result === {
     //     fizzBuzz: 'FizzBuzz',
     // }
 ```
@@ -83,7 +85,7 @@ are provided individually as arguments.
 
     templatize.json(json, '${', '}')
     
-    // json === {
+    // result === {
     //     fizzBuzz: 'FizzBuzz',
     //     fizz: 'Fizz',
     //     buzz: 'Buzz'
@@ -106,7 +108,63 @@ colon inside the template start and end characters.
 
     templatize.json(json, '${', '}')
     
-    // json === {
+    // result === {
     //     fizzBuzz: 'FizzBuzz',
     // }
+```
+
+| methods       | description                                                                                                            |
+|---------------|------------------------------------------------------------------------------------------------------------------------|
+| json.unresolved    | returns an array with two elements 0 the resolved JSON 1 a list of unresolved templates                           |
+| json.readFile      | support all the features of the main JSON method but with the addition to suppporting file paths                  |
+| json.readFileSync  | same as readFile but blocks the event loop                                                                        |
+| json.writeFile     | same as readFile but first param is a path which points to a location on where to write the result of the parsing |
+| json.writeFileSync | same as writeFile but blocks the event loop                                                                       |
+
+## json.unresolved
+
+Will return an array with the first element being the result of parsing and the second element being the list of unresolved templates. This
+can be a useful for custom use case when templates are required to be resolved, throw an error, logging a warning etc.
+
+``` javascript
+    var templatize = require('templatizejs')
+    var json = {
+        fizzBuzz: '{{fizz}}{{buzz}}',
+        fizz: 'Fizz',
+    }
+
+    var [ result, templates ] = templatize.json.unresolved(json)
+    
+    // result === {
+    //     fizzBuzz: 'Fizz{{buzz}}',
+    //     fizz: 'Fizz',
+    // }
+
+    // template === ['Fizz{{buzz}}']
+```
+
+## json.readFile
+
+If there is a JSON or YAML file in your application used for configuration this method will read the file and return the resolved JSON.
+This method is synchronous and will block the event loop. It return a bluebird promise if you want to work with callbacks instead you can
+use bluebird to convert the promise to a callback.
+
+``` javascript
+    var templatize = require('templatizejs')
+
+    templatize.json.readFile(_dirname '/someJSON.json').then(function(result){
+        // do something
+    })
+```
+
+## json.readFileSync 
+
+Same as readFile but block the event loop and no need to use a promise
+
+``` javascript
+    var templatize = require('templatizejs')
+
+    var result = templatize.json.readFileSync(_dirname '/someJSON.json')
+    
+    // do something
 ```
