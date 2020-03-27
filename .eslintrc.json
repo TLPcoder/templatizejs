@@ -5,13 +5,10 @@
     },
     "extends": "eslint:recommended",
     "rules": {
-        "no-console": ["error", {
-        "allow": ["warn", "error", "log"]
-        }],
-        "indent": ["error", 4, { "SwitchCase": 1 }],
+        "indent": ["error", 4],
         "linebreak-style": ["error", "unix"],
         "quotes": ["error", "single"],
-        "no-trailing-spaces":"error",
+        "no-trailing-spaces": "error",
         "eol-last": "error"
     }
 }
