@@ -113,6 +113,40 @@ describe('templatize JSON', function () {
             chai.expect(templatize.json(main)).deep.eq(updated)
         })
 
+        it('multiple defaults 2', function () {
+            var main = {
+                "value": "{{hi: {{ default2: {{ default3: defaultValue }} }} }}",
+                "default2": "defaultValue"
+            }
+            var updated = {
+                "value": "defaultValue",
+                "default2": "defaultValue"
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+        })
+
+        it('multiple defaults 3', function () {
+            var main = {
+                "value": "{{hi: {{ default2: {{ default3: defaultValue }} }} }}",
+            }
+            var updated = {
+                "value": "defaultValue",
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+        })
+
+        it('multiple defaults 4', function () {
+            var main = {
+                "value": "{hi: { default2: { default3: defaultValue } } }",
+                "value1": "{value}",
+            }
+            var updated = {
+                "value": "defaultValue",
+                "value1": "defaultValue",
+            }
+            chai.expect(templatize.json(main, '{', '}')).deep.eq(updated)
+        })
+
         it('template reference', function() {
             var main = {
                 hello: 'sad {{ world }}',

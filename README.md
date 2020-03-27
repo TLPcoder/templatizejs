@@ -123,8 +123,10 @@ colon inside the template start and end characters.
 
 ## json.unresolved
 
-Will return an array with the first element being the result of parsing and the second element being the list of unresolved templates. This
-can be a useful for custom use case when templates are required to be resolved, throw an error, logging a warning etc.
+Will return an array with the first element being the result of parsing and the
+second element being the list of unresolved templates. This can be a useful for
+custom use case when templates are required to be resolved, throw an error,
+logging a warning etc.
 
 ``` javascript
     var templatize = require('templatizejs')
@@ -145,26 +147,70 @@ can be a useful for custom use case when templates are required to be resolved, 
 
 ## json.readFile
 
-If there is a JSON or YAML file in your application used for configuration this method will read the file and return the resolved JSON.
-This method is synchronous and will block the event loop. It return a bluebird promise if you want to work with callbacks instead you can
-use bluebird to convert the promise to a callback.
+If there is a JSON or YAML file in your application used for configuration this
+method will read the file and return the resolved JSON. This method is
+synchronous and will block the event loop. It return a bluebird promise if you
+want to work with callbacks instead you can use bluebird to convert the promise
+to a callback.
 
 ``` javascript
     var templatize = require('templatizejs')
 
-    templatize.json.readFile(_dirname '/someJSON.json').then(function(result){
+    templatize.json.readFile(__dirname + '/someJSON.json').then(function(result){
         // do something
     })
 ```
 
 ## json.readFileSync 
 
-Same as readFile but block the event loop and no need to use a promise
+Same as readFile but blocks the event loop and no need to use a promise.
 
 ``` javascript
     var templatize = require('templatizejs')
 
-    var result = templatize.json.readFileSync(_dirname '/someJSON.json')
+    var result = templatize.json.readFileSync(__dirname + '/someJSON.json')
     
+    // do something
+```
+
+## json.writeFile
+
+json.writeFile will create a json file at the provide path. This method returns
+a bluebird Promise when the file has been written and the resolved JSON is
+return in the promise callback. The first argument is required to be a path to
+the destination of where the file should be written to. If a file already exist
+at the provided destination the file will be overridden. json.writeFile supports
+files, objects, or yaml strings as sources of data.
+
+``` javascript
+    var templatize = require('templatizejs')
+    var json = {
+        fizzBuzz: '{{fizz}}{{buzz}}',
+        fizz: 'Fizz',
+    }
+
+    templatize.json.writeFile(__dirname + '/newJSONFile.json', json)
+        .then(function(result) {
+            // file has been create at __dirname + '/newJSONFile.json'
+            // and result is the resolved JSON object
+            // do something
+        })
+```
+
+## json.writeFileSync
+
+Same as writeFile but blocks the event loop and no need to use a promise.
+
+``` javascript
+    var templatize = require('templatizejs')
+    var json = {
+        fizzBuzz: '{{fizz}}{{buzz}}',
+        fizz: 'Fizz',
+    }
+
+    var result = templatize.json.writeFile(__dirname + '/newJSONFile.json', json)
+
+    // file has been create at __dirname + '/newJSONFile.json'
+    // and result is the resolved JSON object
     // do something
 ```
