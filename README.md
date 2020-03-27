@@ -146,10 +146,10 @@ logging a warning etc.
 ## json.readFile
 
 If there is a JSON or YAML file in your application used for configuration this
-method will read the file and return the resolved JSON. This method is
-synchronous and will block the event loop. It return a bluebird promise if you
-want to work with callbacks instead you can use bluebird to convert the promise
-to a callback.
+method will read the file and return the resolved JSON. It return a bluebird
+promise if you want to work with callbacks instead you can use bluebird to
+convert the promise to a callback. json.readFile supports
+files, objects, or yaml strings as sources.
 
 ``` javascript
     var templatize = require('templatizejs')
@@ -173,9 +173,9 @@ Same as readFile but blocks the event loop and no need to use a promise.
 
 ## json.writeFile
 
-json.writeFile will create a JSON file at the provide path. This method returns
+json.writeFile will create a JSON file at the provided path. This method returns
 a bluebird Promise when the file has been written and the resolved JSON is
-return in the promise callback. The first argument is required to be a path to
+return in the promise. The first argument is required to be a path to
 the destination of where the file should be written to. If a file already exist
 at the provided destination the file will be overridden. json.writeFile supports
 files, objects, or yaml strings as sources of data.
