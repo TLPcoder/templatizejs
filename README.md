@@ -16,9 +16,7 @@ yaml
 file
 ...
 
-# JSON
-
-## Intro
+## JSON Intro
 
 At its simplest templatizejs can grab data from other areas of the JSON object.
 It uses JSON path from the root level node to resolve the templates. In the
@@ -175,7 +173,7 @@ Same as readFile but blocks the event loop and no need to use a promise.
 
 ## json.writeFile
 
-json.writeFile will create a json file at the provide path. This method returns
+json.writeFile will create a JSON file at the provide path. This method returns
 a bluebird Promise when the file has been written and the resolved JSON is
 return in the promise callback. The first argument is required to be a path to
 the destination of where the file should be written to. If a file already exist
@@ -208,7 +206,7 @@ Same as writeFile but blocks the event loop and no need to use a promise.
         fizz: 'Fizz',
     }
 
-    var result = templatize.json.writeFile(__dirname + '/newJSONFile.json', json)
+    var result = templatize.json.writeFileSync(__dirname + '/newJSONFile.json', json)
 
     // file has been create at __dirname + '/newJSONFile.json'
     // and result is the resolved JSON object
