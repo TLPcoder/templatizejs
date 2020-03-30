@@ -74,7 +74,7 @@ function resolveEnvValue(path, match) {
 }
 
 function traverseFallback(data, replace) {
-    return data(replace)
+    return replace(data)
 }
 
 function resolve(traverse) {
@@ -94,7 +94,8 @@ function resolve(traverse) {
                 }
 
                 if (str.slice(i, i + end.length) === end) {
-                    var match = str.slice(stack.pop(), i + end.length)
+                    var opening = stack.pop()
+                    var match = str.slice(opening, i + end.length)
                     var path = getPath(match, start, end)
                     var value = get(path, match, main, secondaries)
 
@@ -114,9 +115,9 @@ function resolve(traverse) {
                         if (typeof value === 'object') return value
                         else {
                             str = str.replace(match, value)
-                            if (stack.length) {
-                                i = stack[stack.length - 1]
-                            }
+
+                            if (stack.length) i = stack[stack.length - 1]
+                            else i = opening
                         }
                     }
                 }

@@ -25,8 +25,6 @@ function parseFormat(config) {
 }
 
 function normalize(main, secondaries, start, end) {
-    main = parseFormat(main)
-
     if (secondaries) {
         try {
             secondaries = parseFormat(secondaries)
@@ -67,19 +65,6 @@ function normalize(main, secondaries, start, end) {
 }
 
 function normalizeWithFiles(main, secondaries, start, end) {
-    try {
-        main = parseFormat(main)
-    // eslint-disable-next-line no-empty
-    } catch(_err) {}
-
-    if (typeof main === 'string') {
-        return readFile(main).then(function(file) {
-            main = file
-        }).then(resolveSecondary).then(function() {
-            return normalize(main, secondaries, start, end)
-        })
-    }
-
     return resolveSecondary().then(function () {
         return normalize(main, secondaries, start, end)
     })
@@ -108,15 +93,6 @@ function normalizeWithFiles(main, secondaries, start, end) {
 }
 
 function normalizeWithFilesSync(main, secondaries, start, end) {
-    try {
-        main = parseFormat(main)
-    // eslint-disable-next-line no-empty
-    } catch(_err) {}
-
-    if (typeof main === 'string') {
-        main = readFileSync(main)
-    }
-
     resolveSecondary()
 
     return normalize(main, secondaries, start, end)
@@ -136,7 +112,53 @@ function normalizeWithFilesSync(main, secondaries, start, end) {
     }
 }
 
+function jsonNormalize(main, secondaries, start, end) {
+    main = parseFormat(main)
+    return normalize(main, secondaries, start, end)
+}
+
+function jsonNormalizeWithFiles(main, secondaries, start, end) {
+    try {
+        main = parseFormat(main)
+    // eslint-disable-next-line no-empty
+    } catch(_err) {}
+
+    if (typeof main === 'string') {
+        return readFile(main).then(function(file) {
+            main = file
+        }).then(normalizeWithFiles).then(function() {
+            return normalize(main, secondaries, start, end)
+        })
+    }
+}
+
+function jsonNormalizeWithFilesSync(main, secondaries, start, end) {
+    try {
+        main = parseFormat(main)
+    // eslint-disable-next-line no-empty
+    } catch(_err) {}
+
+    if (typeof main === 'string') {
+        main = readFileSync(main)
+    }
+
+    return normalizeWithFilesSync(main, secondaries, start, end)
+}
+
 module.exports = {
+    json: {
+        normalize: jsonNormalize,
+        normalizeWithFiles: jsonNormalizeWithFiles,
+        normalizeWithFilesSync: jsonNormalizeWithFilesSync
+    },
+    yaml: {
+        normalize: jsonNormalize,
+        normalizeWithFiles: jsonNormalizeWithFiles,
+        normalizeWithFilesSync: jsonNormalizeWithFilesSync
+    },
+    file: {
+
+    },
     normalize: normalize,
     normalizeWithFiles: normalizeWithFiles,
     normalizeWithFilesSync: normalizeWithFilesSync

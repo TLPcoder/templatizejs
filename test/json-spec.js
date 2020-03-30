@@ -22,6 +22,40 @@ describe('templatize JSON', function () {
             chai.expect(templatize.json(main)).eq(main)
         })
 
+        it('multi templates', function () {
+            var main = {
+                helloworld: '{{h}}{{world}}',
+                h: 'hello',
+                world: 'world'
+            }
+            var updated = {
+                helloworld: 'helloworld',
+                h: 'hello',
+                world: 'world'
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+            chai.expect(templatize.json(main)).eq(main)
+        })
+
+        it('resolve tempaltes with templates', function () {
+            var main = {
+                helloworld: '{{locationHello}}{{locationWorld}}',
+                locationHello: '{{hello}}',
+                locationWorld: '{{world}}',
+                hello: 'hello',
+                world: 'world'
+            }
+            var updated = {
+                helloworld: 'helloworld',
+                locationHello: 'hello',
+                locationWorld: 'world',
+                hello: 'hello',
+                world: 'world'
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+            chai.expect(templatize.json(main)).eq(main)
+        })
+
         it('main templates only', function () {
             var main = {
                 hello: '{{world}}',
