@@ -115,34 +115,34 @@ describe('templatize JSON', function () {
 
         it('multiple defaults 2', function () {
             var main = {
-                "value": "{{hi: {{ default2: {{ default3: defaultValue }} }} }}",
-                "default2": "defaultValue"
+                'value': '{{hi: {{ default2: {{ default3: defaultValue }} }} }}',
+                'default2': 'defaultValue'
             }
             var updated = {
-                "value": "defaultValue",
-                "default2": "defaultValue"
+                'value': 'defaultValue',
+                'default2': 'defaultValue'
             }
             chai.expect(templatize.json(main)).deep.eq(updated)
         })
 
         it('multiple defaults 3', function () {
             var main = {
-                "value": "{{hi: {{ default2: {{ default3: defaultValue }} }} }}",
+                'value': '{{hi: {{ default2: {{ default3: defaultValue }} }} }}',
             }
             var updated = {
-                "value": "defaultValue",
+                'value': 'defaultValue',
             }
             chai.expect(templatize.json(main)).deep.eq(updated)
         })
 
         it('multiple defaults 4', function () {
             var main = {
-                "value": "{hi: { default2: { default3: defaultValue } } }",
-                "value1": "{value}",
+                'value': '{hi: { default2: { default3: defaultValue } } }',
+                'value1': '{value}',
             }
             var updated = {
-                "value": "defaultValue",
-                "value1": "defaultValue",
+                'value': 'defaultValue',
+                'value1': 'defaultValue',
             }
             chai.expect(templatize.json(main, '{', '}')).deep.eq(updated)
         })
@@ -270,6 +270,18 @@ describe('templatize JSON', function () {
                         done()
                     })
             })
+            it('file async main "json string" + secondary', function(done) {
+                var secondary = __dirname + '/test-data/test-json3.json'
+
+                templatize.json.readFile('{"hello": "{{world}}"}', secondary)
+                    .then(function(json) {
+                        var updated = {
+                            hello: 'world'
+                        }
+                        chai.expect(json).deep.eq(updated)
+                        done()
+                    })
+            })
             it('file async main + ${} template', function(done) {
                 var main = __dirname + '/test-data/test-json4.json'
 
@@ -368,7 +380,7 @@ describe('templatize JSON', function () {
 
                 templatize.json.readFile('/bad/path')
                     .catch(function(err) {
-                        chai.expect(err.message).deep.eq('ENOENT: no such file or directory, open \'/Users/Trevor/templatejs/lib/../../../../bad/path\'')
+                        chai.expect(err.message).deep.eq('ENOENT: no such file or directory, open \'/Users/Trevor/templatejs/utils/../../../../bad/path\'')
                         done()
                     })
             })
@@ -473,7 +485,7 @@ describe('templatize JSON', function () {
                 try {
                     templatize.json.readFileSync('/bad/path')
                 } catch(err) {
-                    chai.expect(err.message).deep.eq('ENOENT: no such file or directory, open \'/Users/Trevor/templatejs/lib/../../../../bad/path\'')
+                    chai.expect(err.message).deep.eq('ENOENT: no such file or directory, open \'/Users/Trevor/templatejs/utils/../../../../bad/path\'')
                 }
             })
         })

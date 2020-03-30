@@ -12,7 +12,6 @@ with the templates resolved.
 
 html
 css
-yaml
 file
 ...
 
@@ -111,10 +110,12 @@ colon inside the template start and end characters.
     // }
 ```
 
+## Methods
+
 | methods       | description                                                                                                            |
 |---------------|------------------------------------------------------------------------------------------------------------------------|
 | json.unresolved    | returns an array with two elements 0 the resolved JSON 1 a list of unresolved templates                           |
-| json.readFile      | support all the features of the main JSON method but with the addition to suppporting file paths                  |
+| json.readFile      | support all the features of the main yaml method but with the addition to suppporting file paths                  |
 | json.readFileSync  | same as readFile but blocks the event loop                                                                        |
 | json.writeFile     | same as readFile but first param is a path which points to a location on where to write the result of the parsing |
 | json.writeFileSync | same as writeFile but blocks the event loop                                                                       |
@@ -212,3 +213,43 @@ Same as writeFile but blocks the event loop and no need to use a promise.
     // and result is the resolved JSON object
     // do something
 ```
+
+## YAML Intro
+
+The templatize yaml method is very similar to the json method but it return a
+yaml string. Just like the json method it excepts either a json object or yaml
+string and uses a JSON path from the root level node to resolve the templates.
+It also supports the same arguments in the same order. In the below example
+there are two template {{fizz}} and {{buzz}}. A template is indicated by a
+opening character sequences and closing character sequences. In this case it
+defaults to "{{" and "}}". But templatizejs supports the option to create you
+own.
+
+``` javascript
+    var templatize = require('templatizejs')
+    var yaml = {
+        fizzBuzz: '{{fizz}}{{buzz}}',
+        fizz: 'Fizz',
+        buzz: 'Buzz'
+    }
+
+    templatize.yaml(json)
+    
+    // result ===
+    //     fizzBuzz: FizzBuzz
+    //     fizz: Fizz
+    //     buzz: Buzz
+```
+
+### Methods
+
+The Methods for yaml are all the same as json but instead of returning json or
+writing json files the methods return yaml strings or write yaml files.
+
+| methods       | description                                                                                                            |
+|---------------|------------------------------------------------------------------------------------------------------------------------|
+| yaml.unresolved    | returns an array with two elements 0 the resolved yaml 1 a list of unresolved templates                           |
+| yaml.readFile      | support all the features of the main yaml method but with the addition to suppporting file paths                  |
+| yaml.readFileSync  | same as readFile but blocks the event loop                                                                        |
+| yaml.writeFile     | same as readFile but first param is a path which points to a location on where to write the result of the parsing |
+| yaml.writeFileSync | same as writeFile but blocks the event loop                                                                       |
