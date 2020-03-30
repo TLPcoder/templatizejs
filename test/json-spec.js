@@ -533,6 +533,7 @@ describe('templatize JSON', function () {
 })
 
 function setVCAPEnv() {
+    delete require.cache[require.resolve('../utils/resolve-template.js')]
     delete require.cache[require.resolve('../lib/json')]
     delete require.cache[require.resolve('../index')]
 
@@ -595,6 +596,7 @@ function setVCAPEnv() {
     return function() {
         delete process.env.VCAP_APPLICATION
         delete process.env.VCAP_SERVICES
+        delete require.cache[require.resolve('../utils/resolve-template.js')]
         delete require.cache[require.resolve('../lib/json')]
         delete require.cache[require.resolve('../index')]
 
