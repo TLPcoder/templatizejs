@@ -7,7 +7,7 @@ if (process !== undefined) {
     isNode = true
 }
 
-describe.only('templatize File', function () {
+describe('templatize File', function () {
     it('first', function () {
         var file = __dirname + '/test-data/test-file1.txt'
         var source = {

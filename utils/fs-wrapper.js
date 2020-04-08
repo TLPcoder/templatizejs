@@ -32,7 +32,16 @@ function writeFileSync(path, data) {
     return fs.writeFileSync(resolvePath(path), data, 'utf8')
 }
 
+function fileExist(path) {
+    if (typeof path !== 'string') {
+        return false
+    }
+
+    return fs.existsSync(resolvePath(path))
+}
+
 module.exports = {
+    fileExist: fileExist,
     readFile: readFile,
     writeFile: writeFile,
     readFileSync: readFileSync,

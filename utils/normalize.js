@@ -5,6 +5,7 @@ var fsWrapper = require('./fs-wrapper')
 var Promise = require('bluebird').Promise
 var resolve = require('./resolve-template')(traverse)
 
+var fileExist = fsWrapper.fileExist
 var readFile = fsWrapper.readFile
 var readFileSync = fsWrapper.readFileSync
 
@@ -64,10 +65,21 @@ function normalize(main, secondaries, start, end) {
     return [ main, secondaries, start, end ]
 }
 
-function normalizeWithFiles(main, secondaries, start, end) {
-    return resolveSecondary().then(function () {
-        return normalize(main, secondaries, start, end)
-    })
+function normalizeWithFiles(main, secondaries, start, end, notFile) {
+    if (fileExist(main)) {
+        return readFile(main).then(function(file) {
+            main = file
+            return resolveSecondary()
+        }).then(function () {
+            return normalize(main, secondaries, start, end)
+        })
+    }  else if (notFile && typeof main === 'string') {
+        return Promise.reject(Error('cant resolve ' + main))
+    } else {
+        return resolveSecondary().then(function () {
+            return normalize(main, secondaries, start, end)
+        })
+    }
 
     function resolveSecondary() {
         if (
@@ -92,7 +104,13 @@ function normalizeWithFiles(main, secondaries, start, end) {
     }
 }
 
-function normalizeWithFilesSync(main, secondaries, start, end) {
+function normalizeWithFilesSync(main, secondaries, start, end, notFile) {
+    if (fileExist(main)) {
+        main = readFileSync(main)
+    } else if (notFile && typeof main === 'string') {
+        throw Error('cant resolve ' + main)
+    }
+
     resolveSecondary()
 
     return normalize(main, secondaries, start, end)
@@ -123,13 +141,11 @@ function jsonNormalizeWithFiles(main, secondaries, start, end) {
     // eslint-disable-next-line no-empty
     } catch(_err) {}
 
-    if (typeof main === 'string') {
-        return readFile(main).then(function(file) {
-            main = file
-        }).then(normalizeWithFiles).then(function() {
-            return normalize(main, secondaries, start, end)
+    return normalizeWithFiles(main, secondaries, start, end, true)
+        .then(function(args) {
+            args[0] = parseFormat(args[0])
+            return args
         })
-    }
 }
 
 function jsonNormalizeWithFilesSync(main, secondaries, start, end) {
@@ -139,10 +155,12 @@ function jsonNormalizeWithFilesSync(main, secondaries, start, end) {
     } catch(_err) {}
 
     if (typeof main === 'string') {
-        main = readFileSync(main)
+        var args = normalizeWithFilesSync(main, secondaries, start, end, true)
+        args[0] = parseFormat(args[0])
+        return args
+    } else {
+        return normalize(main, secondaries, start, end)
     }
-
-    return normalizeWithFilesSync(main, secondaries, start, end)
 }
 
 module.exports = {
@@ -157,9 +175,7 @@ module.exports = {
         normalizeWithFilesSync: jsonNormalizeWithFilesSync
     },
     file: {
-
-    },
-    normalize: normalize,
-    normalizeWithFiles: normalizeWithFiles,
-    normalizeWithFilesSync: normalizeWithFilesSync
+        normalizeWithFiles: normalizeWithFiles,
+        normalizeWithFilesSync: normalizeWithFilesSync
+    }
 }

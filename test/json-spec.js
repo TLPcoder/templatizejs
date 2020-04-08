@@ -414,7 +414,7 @@ describe('templatize JSON', function () {
 
                 templatize.json.readFile('/bad/path')
                     .catch(function(err) {
-                        chai.expect(err.message).deep.eq('ENOENT: no such file or directory, open \'/Users/TrevorP/Programming/git-projects/templatizejs/utils/../../../../../../bad/path\'')
+                        chai.expect(err.message).deep.eq('cant resolve /bad/path')
                         done()
                     })
             })
@@ -519,7 +519,7 @@ describe('templatize JSON', function () {
                 try {
                     templatize.json.readFileSync('/bad/path')
                 } catch(err) {
-                    chai.expect(err.message).deep.eq('ENOENT: no such file or directory, open \'/Users/TrevorP/Programming/git-projects/templatizejs/utils/../../../../../../bad/path\'')
+                    chai.expect(err.message).deep.eq('cant resolve /bad/path')
                 }
             })
         })
