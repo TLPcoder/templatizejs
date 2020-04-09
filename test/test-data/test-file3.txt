@@ -1,0 +1,1 @@
+my name is {{name.first}} {{name.last}} and i was framed {{framed.{{name.first}}{{name.last}}}}

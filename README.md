@@ -253,3 +253,42 @@ writing json files the methods return yaml strings or write yaml files.
 | yaml.readFileSync  | same as readFile but blocks the event loop                                                                        |
 | yaml.writeFile     | same as readFile but first param is a path which points to a location on where to write the result of the parsing |
 | yaml.writeFileSync | same as writeFile but blocks the event loop                                                                       |
+
+## FILE Intro
+
+The templatize file method is very similar to the json and yaml method but it
+return the content of that file with the resolved templates. It also supports
+a plain string type. It also supports the same arguments in the same order as
+json and yaml methods. But, secondaries data sources are required to resolve
+the json paths used in the templates. You wont be able to pull data from the
+actual file itself.
+
+``` javascript
+    var fs = require('fs')
+    var templatize = require('templatizejs')
+    var file = fs.readFileSync('./path/toData')
+
+    // content in file
+    // '{{fizz}}{{buzz}}'
+
+    var source = {
+        fizz: 'Fizz',
+        buzz: 'Buzz'
+    }
+    var result = templatize.file(json)
+    
+    // result === 'FizzBuzz'
+```
+
+### Methods
+
+The Methods for file are all the same as json and but instead of returning json or
+yaml it returns the contents of the file with the resolved templates.
+
+| methods       | description                                                                                                                 |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------|
+| yaml.unresolved    | returns an array with two elements 0 the resolved file string 1 a list of unresolved templates                         |
+| yaml.readFile      | support all the features of the main file method but with the addition to suppporting file paths async returns promise |
+| yaml.readFileSync  | internally calls file no difference in logic                                                                           |
+| yaml.writeFile     | same as readFile but first param is a path which points to a location on where to write the result of the parsing      |
+| yaml.writeFileSync | same as writeFile but blocks the event loop                                                                            |
