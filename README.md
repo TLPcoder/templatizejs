@@ -284,8 +284,8 @@ yaml it returns the contents of the file with the resolved templates.
 
 | methods       | description                                                                                                                 |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------|
-| yaml.unresolved    | returns an array with two elements 0 the resolved file string 1 a list of unresolved templates                         |
-| yaml.readFile      | support all the features of the main file method but with the addition to suppporting file paths async returns promise |
-| yaml.readFileSync  | internally calls file no difference in logic                                                                           |
-| yaml.writeFile     | same as readFile but first param is a path which points to a location on where to write the result of the parsing      |
-| yaml.writeFileSync | same as writeFile but blocks the event loop                                                                            |
+| file.unresolved    | returns an array with two elements 0 the resolved file string 1 a list of unresolved templates                         |
+| file.readFile      | support all the features of the main file method but with the addition to suppporting file paths async returns promise |
+| file.readFileSync  | internally calls file no difference in logic                                                                           |
+| file.writeFile     | same as readFile but first param is a path which points to a location on where to write the result of the parsing      |
+| file.writeFileSync | same as writeFile but blocks the event loop                                                                            |
