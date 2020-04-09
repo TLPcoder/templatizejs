@@ -1,18 +1,15 @@
 # Templatizejs
 
-A simple node modules that provides the ability to take your normal JSON
-structures and extend them through the use of templates. This module supports
-both browser and node usage. However templatizejs is more useful for the node
-user at is lets you extend from the process object and vcap env variables.
-
-Templatizejs supports YAML and will convert JSON and return a JSON object
-with the templates resolved.
+A simple node modules that provides the ability to take your normal JSON, YAML,
+or file and extend them through the use of templates. This module supports both
+browser and node usage. However templatizejs is more useful for the node user
+at is lets you parse files, and extend from the process object, vcap env
+variables.
 
 ## FUTURE SUPPORT
 
 html
 css
-file
 ...
 
 ## JSON Intro
