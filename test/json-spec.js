@@ -22,6 +22,40 @@ describe('templatize JSON', function () {
             chai.expect(templatize.json(main)).eq(main)
         })
 
+        it('multi templates', function () {
+            var main = {
+                helloworld: '{{h}}{{world}}',
+                h: 'hello',
+                world: 'world'
+            }
+            var updated = {
+                helloworld: 'helloworld',
+                h: 'hello',
+                world: 'world'
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+            chai.expect(templatize.json(main)).eq(main)
+        })
+
+        it('resolve tempaltes with templates', function () {
+            var main = {
+                helloworld: '{{locationHello}}{{locationWorld}}',
+                locationHello: '{{hello}}',
+                locationWorld: '{{world}}',
+                hello: 'hello',
+                world: 'world'
+            }
+            var updated = {
+                helloworld: 'helloworld',
+                locationHello: 'hello',
+                locationWorld: 'world',
+                hello: 'hello',
+                world: 'world'
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+            chai.expect(templatize.json(main)).eq(main)
+        })
+
         it('main templates only', function () {
             var main = {
                 hello: '{{world}}',
@@ -380,7 +414,7 @@ describe('templatize JSON', function () {
 
                 templatize.json.readFile('/bad/path')
                     .catch(function(err) {
-                        chai.expect(err.message).deep.eq('ENOENT: no such file or directory, open \'/Users/Trevor/templatejs/utils/../../../../bad/path\'')
+                        chai.expect(err.message).deep.eq('cant resolve /bad/path')
                         done()
                     })
             })
@@ -485,7 +519,7 @@ describe('templatize JSON', function () {
                 try {
                     templatize.json.readFileSync('/bad/path')
                 } catch(err) {
-                    chai.expect(err.message).deep.eq('ENOENT: no such file or directory, open \'/Users/Trevor/templatejs/utils/../../../../bad/path\'')
+                    chai.expect(err.message).deep.eq('cant resolve /bad/path')
                 }
             })
         })
@@ -533,6 +567,7 @@ describe('templatize JSON', function () {
 })
 
 function setVCAPEnv() {
+    delete require.cache[require.resolve('../utils/resolve-template.js')]
     delete require.cache[require.resolve('../lib/json')]
     delete require.cache[require.resolve('../index')]
 
@@ -595,6 +630,7 @@ function setVCAPEnv() {
     return function() {
         delete process.env.VCAP_APPLICATION
         delete process.env.VCAP_SERVICES
+        delete require.cache[require.resolve('../utils/resolve-template.js')]
         delete require.cache[require.resolve('../lib/json')]
         delete require.cache[require.resolve('../index')]
 

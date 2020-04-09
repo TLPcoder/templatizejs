@@ -1,6 +1,6 @@
 {
   "name": "templatizejs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,11 @@
     "parser",
     "parse",
     "json",
-    "yaml"
+    "yaml",
+    "file",
+    "files",
+    "filesystem",
+    "fs"
   ],
   "author": "",
   "license": "ISC",
