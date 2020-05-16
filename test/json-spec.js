@@ -39,14 +39,14 @@ describe('templatize JSON', function () {
 
         it('resolve tempaltes with templates', function () {
             var main = {
-                helloworld: '{{locationHello}}{{locationWorld}}',
+                helloworld: '{{locationHello}} {{locationWorld}}',
                 locationHello: '{{hello}}',
                 locationWorld: '{{world}}',
                 hello: 'hello',
                 world: 'world'
             }
             var updated = {
-                helloworld: 'helloworld',
+                helloworld: 'hello world',
                 locationHello: 'hello',
                 locationWorld: 'world',
                 hello: 'hello',
@@ -205,6 +205,27 @@ describe('templatize JSON', function () {
                 empty: null
             }
             chai.expect(templatize.json(main)).deep.eq(updated)
+        })
+
+        it('custom callback to handle templates', function() {
+            var main = {
+                hello: 'sad {{ world }}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, handle)).deep.eq(updated)
         })
 
         if (isNode) {

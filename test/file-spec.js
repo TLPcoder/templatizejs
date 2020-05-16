@@ -2,10 +2,6 @@ var fs = require('fs')
 var chai = require('chai')
 var templatize = require('../index')
 
-if (process !== undefined) {
-    isNode = true
-}
-
 describe('templatize File', function () {
     it('read from file', function () {
         var file = __dirname + '/test-data/test-file1.txt'
@@ -53,7 +49,7 @@ describe('templatize File', function () {
             var compare = fs.readFileSync(__dirname + '/test-data/test-file6.txt', 'utf8')
             var results = templatize.file.unresolved(file, source)
             var result = results[0]
-            var unresolved = results[1] 
+            var unresolved = results[1]
             chai.expect(result).eq(compare)
             chai.expect(unresolved[0]).eq('{{cant resolve}}')
             chai.expect(unresolved[1]).eq('{{nested{{template}}}}')
@@ -72,7 +68,7 @@ describe('templatize File', function () {
                 .replace(/}}/g, '}')
             var results = templatize.file.unresolved(file, source, '${', '}')
             var result = results[0]
-            var unresolved = results[1] 
+            var unresolved = results[1]
             chai.expect(result).eq(compare)
             chai.expect(unresolved[0]).eq('${cant resolve}')
             chai.expect(unresolved[1]).eq('${nested${template}}')

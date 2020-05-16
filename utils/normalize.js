@@ -9,8 +9,15 @@ var fileExist = fsWrapper.fileExist
 var readFile = fsWrapper.readFile
 var readFileSync = fsWrapper.readFileSync
 
+function isFunction(f) {
+    return typeof f === 'function'
+}
+
 function parseFormat(config) {
-    if (typeof config === 'object' && config !== null) {
+    if (
+        typeof config === 'object' &&
+        config !== null
+    ) {
         return config
     }
 
@@ -25,8 +32,8 @@ function parseFormat(config) {
     }
 }
 
-function normalize(main, secondaries, start, end) {
-    if (secondaries) {
+function normalize(main, secondaries, start, end, cb) {
+    if (secondaries && !isFunction(secondaries)) {
         try {
             secondaries = parseFormat(secondaries)
             // eslint-disable-next-line no-empty
@@ -42,18 +49,31 @@ function normalize(main, secondaries, start, end) {
             start = secondaries
             secondaries = null
         }
+    } else if (isFunction(secondaries)) {
+        cb = secondaries
+        secondaries = null
     }
 
     if (!start) {
+        start = '{{'
+    } else if (isFunction(start)) {
+        cb = start
         start = '{{'
     }
 
     if (!end) {
         end = '}}'
+    } else if (isFunction(end)) {
+        cb = end
+        end = '}}'
     }
 
     if (!secondaries) {
         secondaries = null
+    }
+
+    if (!cb) {
+        cb = null
     }
 
     if(typeof secondaries === 'object' && secondaries !== null) {
@@ -62,22 +82,22 @@ function normalize(main, secondaries, start, end) {
         })
     }
 
-    return [ main, secondaries, start, end ]
+    return [ main, secondaries, start, end, cb ]
 }
 
-function normalizeWithFiles(main, secondaries, start, end, notFile) {
+function normalizeWithFiles(main, secondaries, start, end, notFile, cb) {
     if (fileExist(main)) {
         return readFile(main).then(function(file) {
             main = file
             return resolveSecondary()
         }).then(function () {
-            return normalize(main, secondaries, start, end)
+            return normalize(main, secondaries, start, end, cb)
         })
     }  else if (notFile && typeof main === 'string') {
         return Promise.reject(Error('cant resolve ' + main))
     } else {
         return resolveSecondary().then(function () {
-            return normalize(main, secondaries, start, end)
+            return normalize(main, secondaries, start, end, cb)
         })
     }
 
@@ -104,7 +124,7 @@ function normalizeWithFiles(main, secondaries, start, end, notFile) {
     }
 }
 
-function normalizeWithFilesSync(main, secondaries, start, end, notFile) {
+function normalizeWithFilesSync(main, secondaries, start, end, notFile, cb) {
     if (fileExist(main)) {
         main = readFileSync(main)
     } else if (notFile && typeof main === 'string') {
@@ -113,7 +133,7 @@ function normalizeWithFilesSync(main, secondaries, start, end, notFile) {
 
     resolveSecondary()
 
-    return normalize(main, secondaries, start, end)
+    return normalize(main, secondaries, start, end, cb)
 
     function resolveSecondary() {
         if (
@@ -130,36 +150,36 @@ function normalizeWithFilesSync(main, secondaries, start, end, notFile) {
     }
 }
 
-function jsonNormalize(main, secondaries, start, end) {
+function jsonNormalize(main, secondaries, start, end, cb) {
     main = parseFormat(main)
-    return normalize(main, secondaries, start, end)
+    return normalize(main, secondaries, start, end, cb)
 }
 
-function jsonNormalizeWithFiles(main, secondaries, start, end) {
+function jsonNormalizeWithFiles(main, secondaries, start, end, cb) {
     try {
         main = parseFormat(main)
     // eslint-disable-next-line no-empty
     } catch(_err) {}
 
-    return normalizeWithFiles(main, secondaries, start, end, true)
+    return normalizeWithFiles(main, secondaries, start, end, true, cb)
         .then(function(args) {
             args[0] = parseFormat(args[0])
             return args
         })
 }
 
-function jsonNormalizeWithFilesSync(main, secondaries, start, end) {
+function jsonNormalizeWithFilesSync(main, secondaries, start, end, cb) {
     try {
         main = parseFormat(main)
     // eslint-disable-next-line no-empty
     } catch(_err) {}
 
     if (typeof main === 'string') {
-        var args = normalizeWithFilesSync(main, secondaries, start, end, true)
+        var args = normalizeWithFilesSync(main, secondaries, start, end, true, cb)
         args[0] = parseFormat(args[0])
         return args
     } else {
-        return normalize(main, secondaries, start, end)
+        return normalize(main, secondaries, start, end, cb)
     }
 }
 
