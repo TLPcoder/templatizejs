@@ -228,6 +228,108 @@ describe('templatize JSON', function () {
             chai.expect(templatize.json(main, handle)).deep.eq(updated)
         })
 
+        it('custom callback to handle templates with sources', function() {
+            var main = {
+                hello: 'sad {{ world }}',
+            }
+            var source = {
+                world: { covid19: 'sad world'},
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, source, handle)).deep.eq(updated)
+        })
+        
+        it('custom callback to handle templates with custom template start only', function() {
+            var main = {
+                hello: 'sad ${ world }}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, '${', handle)).deep.eq(updated)
+        })
+
+        it('custom callback to handle templates with custom templates', function() {
+            var main = {
+                hello: 'sad ${ world }',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, '${', '}', handle)).deep.eq(updated)
+        })
+
+        it('custom callback to handle templates all options', function() {
+            var main = {
+                hello: 'sad ${ world }',
+            }
+            var source = {
+                world: { covid19: 'sad world'},
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, source, '${', '}', handle)).deep.eq(updated)
+        })
+
+        it('custom callback to handle templates all options', function() {
+            var main = {
+                hello: 'sad ${ world }}',
+            }
+            var source = {
+                world: { covid19: 'sad world'},
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, source, '${', handle)).deep.eq(updated)
+        })
+
         if (isNode) {
             it('vcap application', function () {
                 var removeVCAP = setVCAPEnv()
@@ -255,7 +357,7 @@ describe('templatize JSON', function () {
                     cert: 'my-cert'
                 }
                 chai.expect(templatize.json(main)).deep.eq(updated)
-
+                
                 removeVCAP()
             })
 
@@ -449,6 +551,24 @@ describe('templatize JSON', function () {
                 }
                 chai.expect(json).deep.eq(updated)
             })
+
+            it('custom callback to handle templates with sources', function() {
+                var wasCalled = false
+                var file = __dirname + '/test-data/test-json1.json'
+                var json = templatize.json.readFileSync(file, handle)
+                var updated = {
+                    hello: 'world',
+                    world: 'world'
+                }
+                function handle(value) {
+                    wasCalled = true
+    
+                    return value
+                }
+                chai.expect(json).deep.eq(updated)
+                chai.expect(wasCalled).eq(true)
+            })
+            
             it('file sync main + secondary', function() {
                 var main = __dirname + '/test-data/test-json2.json'
                 var secondary = __dirname + '/test-data/test-json3.json'
@@ -557,6 +677,33 @@ describe('templatize JSON', function () {
                             world: 'world'
                         }
 
+                        chai.expect(json).deep.eq(updated)
+                        chai.expect(json).deep.eq(JSON.parse(writtenFile))
+
+                        fs.unlinkSync(writeTo)
+
+                        done()
+                    })
+            })
+            it('write file with cb', function(done) {
+                var wasCalled = false
+                var writeTo = __dirname + '/test-data/tmp.json'
+                var main = __dirname + '/test-data/test-json1.json'
+                
+                function cb(value) {
+                    wasCalled = true
+                    return value
+                }
+
+                templatize.json.writeFile(writeTo, main, cb)
+                    .then(function(json) {
+                        var writtenFile = fs.readFileSync(writeTo, 'utf8')
+                        var updated = {
+                            hello: 'world',
+                            world: 'world'
+                        }
+
+                        chai.expect(wasCalled).deep.eq(true)
                         chai.expect(json).deep.eq(updated)
                         chai.expect(json).deep.eq(JSON.parse(writtenFile))
 

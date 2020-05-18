@@ -13,11 +13,20 @@ function isFunction(f) {
     return typeof f === 'function'
 }
 
+function isString(s) {
+    return typeof s === 'string'
+}
+
+function isArray(a) {
+    return a instanceof Array
+}
+
+function isPlainObject(o) {
+    return (typeof o === 'object' && o !== null)
+}
+
 function parseFormat(config) {
-    if (
-        typeof config === 'object' &&
-        config !== null
-    ) {
+    if (isPlainObject(config)) {
         return config
     }
 
@@ -40,12 +49,20 @@ function normalize(main, secondaries, start, end, cb) {
         } catch(_err) { }
     }
 
-    if (typeof secondaries === 'string') {
-        if (typeof start === 'string') {
+    if (isString(secondaries)) {
+        if (isString(start)) {
+            if (isFunction(end)) {
+                cb = end
+            }
+
             end = start
             start = secondaries
             secondaries = null
-        } else {
+        } else if (isFunction(start)) {
+            cb = start
+            start = secondaries
+            secondaries = null
+        } else  {
             start = secondaries
             secondaries = null
         }
@@ -76,9 +93,9 @@ function normalize(main, secondaries, start, end, cb) {
         cb = null
     }
 
-    if(typeof secondaries === 'object' && secondaries !== null) {
+    if(isPlainObject(secondaries)) {
         secondaries = ea(secondaries).map(function(e) {
-            return resolve(parseFormat(e), null, start, end)
+            return resolve(parseFormat(e), null, start, end, cb)
         })
     }
 
@@ -93,7 +110,7 @@ function normalizeWithFiles(main, secondaries, start, end, notFile, cb) {
         }).then(function () {
             return normalize(main, secondaries, start, end, cb)
         })
-    }  else if (notFile && typeof main === 'string') {
+    }  else if (notFile && isString(main)) {
         return Promise.reject(Error('cant resolve ' + main))
     } else {
         return resolveSecondary().then(function () {
@@ -103,11 +120,11 @@ function normalizeWithFiles(main, secondaries, start, end, notFile, cb) {
 
     function resolveSecondary() {
         if (
-            secondaries instanceof Array ||
-            typeof secondaries === 'string'
+            isArray(secondaries) ||
+            isString(secondaries)
         ) {
             var paths = ea(secondaries).map(function(f) {
-                return typeof f === 'string'
+                return isString(f)
                     ? readFile(f)
                     : Promise.resolve(f)
             })
@@ -127,7 +144,7 @@ function normalizeWithFiles(main, secondaries, start, end, notFile, cb) {
 function normalizeWithFilesSync(main, secondaries, start, end, notFile, cb) {
     if (fileExist(main)) {
         main = readFileSync(main)
-    } else if (notFile && typeof main === 'string') {
+    } else if (notFile && isString(main)) {
         throw Error('cant resolve ' + main)
     }
 
@@ -137,12 +154,12 @@ function normalizeWithFilesSync(main, secondaries, start, end, notFile, cb) {
 
     function resolveSecondary() {
         if (
-            secondaries instanceof Array ||
-            typeof secondaries === 'string'
+            isArray(secondaries) ||
+            isString(secondaries)
         ) {
             try {
                 secondaries = ea(secondaries).map(function(f) {
-                    return typeof f === 'string' ? readFileSync(f) : f
+                    return isString(f) ? readFileSync(f) : f
                 })
             // eslint-disable-next-line no-empty
             } catch(_err) {}
@@ -174,7 +191,7 @@ function jsonNormalizeWithFilesSync(main, secondaries, start, end, cb) {
     // eslint-disable-next-line no-empty
     } catch(_err) {}
 
-    if (typeof main === 'string') {
+    if (isString(main)) {
         var args = normalizeWithFilesSync(main, secondaries, start, end, true, cb)
         args[0] = parseFormat(args[0])
         return args
