@@ -102,7 +102,7 @@ function normalize(main, secondaries, start, end, cb) {
     return [ main, secondaries, start, end, cb ]
 }
 
-function normalizeWithFiles(main, secondaries, start, end, notFile, cb) {
+function normalizeWithFiles(main, secondaries, start, end, cb, notFile) {
     if (fileExist(main)) {
         return readFile(main).then(function(file) {
             main = file
@@ -141,7 +141,7 @@ function normalizeWithFiles(main, secondaries, start, end, notFile, cb) {
     }
 }
 
-function normalizeWithFilesSync(main, secondaries, start, end, notFile, cb) {
+function normalizeWithFilesSync(main, secondaries, start, end, cb, notFile) {
     if (fileExist(main)) {
         main = readFileSync(main)
     } else if (notFile && isString(main)) {
@@ -178,7 +178,7 @@ function jsonNormalizeWithFiles(main, secondaries, start, end, cb) {
     // eslint-disable-next-line no-empty
     } catch(_err) {}
 
-    return normalizeWithFiles(main, secondaries, start, end, true, cb)
+    return normalizeWithFiles(main, secondaries, start, end, cb, true)
         .then(function(args) {
             args[0] = parseFormat(args[0])
             return args
@@ -192,7 +192,7 @@ function jsonNormalizeWithFilesSync(main, secondaries, start, end, cb) {
     } catch(_err) {}
 
     if (isString(main)) {
-        var args = normalizeWithFilesSync(main, secondaries, start, end, true, cb)
+        var args = normalizeWithFilesSync(main, secondaries, start, end, cb, true)
         args[0] = parseFormat(args[0])
         return args
     } else {
@@ -212,7 +212,15 @@ module.exports = {
         normalizeWithFilesSync: jsonNormalizeWithFilesSync
     },
     file: {
-        normalizeWithFiles: normalizeWithFiles,
-        normalizeWithFilesSync: normalizeWithFilesSync
+        normalizeWithFiles: fileNormalizer(normalizeWithFiles),
+        normalizeWithFilesSync: fileNormalizer(normalizeWithFilesSync)
+    }
+}
+
+function fileNormalizer(normalizer) {
+    return function() {
+        var args = normalize.apply(null, arguments).concat(false)
+
+        return normalizer.apply(null, args)
     }
 }

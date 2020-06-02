@@ -109,12 +109,13 @@ function resolve(traverse) {
                         ).trim()
                     }
 
+
+                    if (cb && !isDefault) {
+                        value = cb(value, match, str, main, secondaries)
+                    }
+
                     if (value !== match) {
                         resolveCount++
-
-                        if (cb) {
-                            value = cb(value, match, str, main, secondaries)
-                        }
 
                         if (str === match) return value
                         if (typeof value === 'object') return value

@@ -13,6 +13,22 @@ describe('templatize File', function () {
         var result = templatize.file(file, source)
         chai.expect(result).eq(compare)
     })
+    it('read from file', function () {
+        var wasCalled = false
+        var cb = function(value) {
+            wasCalled = true
+            return value
+        }
+        var file = __dirname + '/test-data/test-file1.txt'
+        var source = {
+            name: 'bob',
+            addresses: ['somewhere']
+        }
+        var compare = fs.readFileSync(__dirname + '/test-data/test-file2.txt', 'utf8')
+        var result = templatize.file(file, source, cb)
+        chai.expect(wasCalled).eq(true)
+        chai.expect(result).eq(compare)
+    })
     it('pass string', function () {
         var file = __dirname + '/test-data/test-file1.txt'
         var source = {
@@ -40,16 +56,23 @@ describe('templatize File', function () {
         chai.expect(result).eq(compare)
     })
     describe('file.unresolved', function() {
-        it('read from file unresolved', function () {
+        it('read from file unresolved cb', function () {
+            var wasCalled = false
+            var cb = function(value) {
+                wasCalled = true
+                return value
+            }
             var file = __dirname + '/test-data/test-file5.txt'
             var source = {
                 name: 'bob',
                 addresses: ['somewhere']
             }
             var compare = fs.readFileSync(__dirname + '/test-data/test-file6.txt', 'utf8')
-            var results = templatize.file.unresolved(file, source)
+            var results = templatize.file.unresolved(file, source, cb)
             var result = results[0]
             var unresolved = results[1]
+
+            chai.expect(wasCalled).eq(true)
             chai.expect(result).eq(compare)
             chai.expect(unresolved[0]).eq('{{cant resolve}}')
             chai.expect(unresolved[1]).eq('{{nested{{template}}}}')
@@ -81,9 +104,15 @@ describe('templatize File', function () {
                 name: 'bob',
                 addresses: ['somewhere']
             }
+            var wasCalled = false
+            var cb = function(value) {
+                wasCalled = true
+                return value
+            }
             var compare = fs.readFileSync(__dirname + '/test-data/test-file2.txt', 'utf8')
-            templatize.file.readFile(file, source)
+            templatize.file.readFile(file, source, cb)
                 .then(function(result) {
+                    chai.expect(wasCalled).eq(true)
                     chai.expect(result).eq(compare)
                     done()
                 })
@@ -128,11 +157,17 @@ describe('templatize File', function () {
                 name: 'bob',
                 addresses: ['somewhere']
             }
+            var wasCalled = false
+            var cb = function(value) {
+                wasCalled = true
+                return value
+            }
             var writeTo = __dirname + '/test-data/tmp.txt'
             var compare = fs.readFileSync(__dirname + '/test-data/test-file2.txt', 'utf8')
-            templatize.file.writeFile(writeTo, file, source)
+            templatize.file.writeFile(writeTo, file, source,cb)
                 .then(function() {
                     var result = fs.readFileSync(writeTo, 'utf8')
+                    chai.expect(wasCalled).eq(true)
                     chai.expect(result).eq(compare)
                     fs.unlinkSync(writeTo)
                     done()
@@ -184,10 +219,16 @@ describe('templatize File', function () {
                 name: 'bob',
                 addresses: ['somewhere']
             }
+            var wasCalled = false
+            var cb = function(value) {
+                wasCalled = true
+                return value
+            }
             var writeTo = __dirname + '/test-data/tmp.txt'
             var compare = fs.readFileSync(__dirname + '/test-data/test-file2.txt', 'utf8')
-            templatize.file.writeFileSync(writeTo, file, source)
+            templatize.file.writeFileSync(writeTo, file, source, cb)
             var result = fs.readFileSync(writeTo, 'utf8')
+            chai.expect(wasCalled).eq(true)
             chai.expect(result).eq(compare)
             fs.unlinkSync(writeTo)
             done()
