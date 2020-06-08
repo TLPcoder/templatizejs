@@ -1,20 +1,14 @@
-export = file;
-declare function file(...args: any[]): any;
-declare namespace file {
-    export { fileUnresolved as unresolved };
-    export { fileReadFile as readFile };
-    export { fileReadFileSync as readFileSync };
-    export { fileWriteFile as writeFile };
-    export { fileWriteFileSync as writeFileSync };
-}
-declare function fileUnresolved(...args: any[]): any[];
-declare function fileReadFile(...args: any[]): any;
-declare function fileReadFileSync(...args: any[]): any;
-declare function fileWriteFile(writeTo: any, ...args: any[]): any;
-declare function fileWriteFileSync(writeTo: any, ...args: any[]): any;
+// <============================================JSON============================================>
+
 
 export = json;
-declare function json(...args: any[]): any;
+declare function json(
+    ource: Object | string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Object;
 declare namespace json {
     export { jsonUnresolved as unresolved };
     export { jsonReadFile as readFile };
@@ -22,14 +16,54 @@ declare namespace json {
     export { jsonWriteFile as writeFile };
     export { jsonWriteFileSync as writeFileSync };
 }
-declare function jsonUnresolved(...args: any[]): any[];
-declare function jsonReadFile(...args: any[]): any;
-declare function jsonReadFileSync(...args: any[]): any;
-declare function jsonWriteFile(writeTo: any, ...args: any[]): any;
-declare function jsonWriteFileSync(writeTo: any, ...args: any[]): any;
+declare function jsonUnresolved(
+    source: Object | string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): [Array<string>, Object];
+declare function jsonReadFile(
+    source: Object | string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Promise<Object>;
+declare function jsonReadFileSync(
+    source: Object | string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Object;
+declare function jsonWriteFile(
+    writeTo: string,
+    source: Object | string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string, callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Promise<Object>;
+declare function jsonWriteFileSync(
+    writeTo: string,
+    source: Object | string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string, callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Object;
+
+
+// <============================================YAML============================================>
+
 
 export = yaml;
-declare function yaml(...args: any[]): any;
+declare function yaml(
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): string;
 declare namespace yaml {
     export { yamlUnresolved as unresolved };
     export { yamlReadFile as readFile };
@@ -37,9 +71,100 @@ declare namespace yaml {
     export { yamlWriteFile as writeFile };
     export { yamlWriteFileSync as writeFileSync };
 }
-declare function yamlUnresolved(...args: any[]): any[];
-declare function yamlReadFile(...args: any[]): any;
-declare function yamlReadFileSync(...args: any[]): any;
-declare function yamlWriteFile(writeTo: any, ...args: any[]): any;
-declare function yamlWriteFileSync(writeTo: any, ...args: any[]): any;
 
+declare function yamlUnresolved(
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): [Array<string>, string];
+
+declare function yamlReadFile(
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Promise<string>;
+
+declare function yamlReadFileSync(
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): string;
+
+declare function yamlWriteFile(
+    writeTo: string,
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Promise<string>;
+
+declare function yamlWriteFileSync(
+    writeTo: string,
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): string;
+
+
+// <============================================FILE============================================>
+
+
+export = file;
+declare function file(
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): string;
+declare namespace file {
+    export { fileUnresolved as unresolved };
+    export { fileReadFile as readFile };
+    export { fileReadFileSync as readFileSync };
+    export { fileWriteFile as writeFile };
+    export { fileWriteFileSync as writeFileSync };
+}
+declare function fileUnresolved(
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): [Array<string>, string];
+declare function fileReadFile(
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Promise<string>;
+declare function fileReadFileSync(
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string,
+    callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): string;
+declare function fileWriteFile(
+    writeTo: string,
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string, callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): Promise<string>;
+declare function fileWriteFileSync(
+    writeTo: string,
+    source: string,
+    sources?: Object | string | Array<Object | string>,
+    start?: string,
+    end?: string, callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
+): string;

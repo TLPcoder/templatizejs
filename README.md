@@ -14,6 +14,14 @@ css
 
 ## JSON Intro
 
+json(
+    source: Object | string,
+    sources: Object | string | Array<Object | string>,
+    start: string,
+    end: string,
+    callback: (...args) => any
+): Object
+
 At its simplest templatizejs can grab data from other areas of the JSON object.
 It uses JSON path from the root level node to resolve the templates. In the
 below example there are two template {{fizz}} and {{buzz}}. A template is
@@ -109,8 +117,8 @@ colon inside the template start and end characters.
 
 ## Methods
 
-| methods       | description                                                                                                            |
-|---------------|------------------------------------------------------------------------------------------------------------------------|
+| methods            | description                                                                                                       |
+|--------------------|-------------------------------------------------------------------------------------------------------------------|
 | json.unresolved    | returns an array with two elements 0 the resolved JSON 1 a list of unresolved templates                           |
 | json.readFile      | support all the features of the main yaml method but with the addition to suppporting file paths                  |
 | json.readFileSync  | same as readFile but blocks the event loop                                                                        |
@@ -118,6 +126,14 @@ colon inside the template start and end characters.
 | json.writeFileSync | same as writeFile but blocks the event loop                                                                       |
 
 ## json.unresolved
+
+json.unresolved(
+    source: Object | string,
+    sources: Object | string | Array<Object | string>,
+    start: string,
+    end: string,
+    callback: (...args) => any
+): [ Array<string>, Object ]
 
 Will return an array with the first element being the result of parsing and the
 second element being the list of unresolved templates. This can be a useful for
@@ -143,6 +159,14 @@ logging a warning etc.
 
 ## json.readFile
 
+json.readFile(
+    source: Object | string,
+    sources: Object | string | Array<Object | string>,
+    start: string,
+    end: string,
+    callback: (...args) => any
+): Promise<Object>
+
 If there is a JSON or YAML file in your application used for configuration this
 method will read the file and return the resolved JSON. It return a bluebird
 promise if you want to work with callbacks instead you can use bluebird to
@@ -158,6 +182,14 @@ files, objects, or yaml strings as sources.
 ```
 
 ## json.readFileSync 
+
+json.readFileSync(
+    source: Object | string,
+    sources: Object | string | Array<Object | string>,
+    start: string,
+    end: string,
+    callback: (...args) => any
+): Object
 
 Same as readFile but blocks the event loop and no need to use a promise.
 
@@ -178,6 +210,15 @@ the destination of where the file should be written to. If a file already exist
 at the provided destination the file will be overridden. json.writeFile supports
 files, objects, or yaml strings as sources of data.
 
+json.writeFile(
+    writeTo: string,
+    source: Object | string,
+    sources: Object | string | Array<Object | string>,
+    start: string,
+    end: string,
+    callback: (...args) => any
+): Promise<Object>
+
 ``` javascript
     var templatize = require('templatizejs')
     var json = {
@@ -194,6 +235,15 @@ files, objects, or yaml strings as sources of data.
 ```
 
 ## json.writeFileSync
+
+json.writeFileSync(
+    writeTo: string,
+    source: Object | string,
+    sources: Object | string | Array<Object | string>,
+    start: string,
+    end: string,
+    callback: (...args) => any
+): Object
 
 Same as writeFile but blocks the event loop and no need to use a promise.
 
@@ -212,6 +262,14 @@ Same as writeFile but blocks the event loop and no need to use a promise.
 ```
 
 ## YAML Intro
+
+yaml(
+    source: string,
+    sources: Object | string | Array<Object | string>,
+    start: string,
+    end: string,
+    callback: (...args) => any
+): string
 
 The templatize yaml method is very similar to the json method but it return a
 yaml string. Just like the json method it excepts either a json object or yaml
@@ -243,8 +301,8 @@ own.
 The Methods for yaml are all the same as json but instead of returning json or
 writing json files the methods return yaml strings or write yaml files.
 
-| methods       | description                                                                                                            |
-|---------------|------------------------------------------------------------------------------------------------------------------------|
+| methods            | description                                                                                                       |
+|--------------------|-------------------------------------------------------------------------------------------------------------------|
 | yaml.unresolved    | returns an array with two elements 0 the resolved yaml 1 a list of unresolved templates                           |
 | yaml.readFile      | support all the features of the main yaml method but with the addition to suppporting file paths                  |
 | yaml.readFileSync  | same as readFile but blocks the event loop                                                                        |
@@ -252,6 +310,15 @@ writing json files the methods return yaml strings or write yaml files.
 | yaml.writeFileSync | same as writeFile but blocks the event loop                                                                       |
 
 ## FILE Intro
+
+file(
+    source: string,
+    sources: Object | string | Array<Object | string>,
+    start: string,
+    end: string,
+    callback: (...args) => any
+): string
+
 
 The templatize file method is very similar to the json and yaml method but it
 return the content of that file with the resolved templates. It also supports
@@ -282,10 +349,42 @@ actual file itself.
 The Methods for file are all the same as json and but instead of returning json or
 yaml it returns the contents of the file with the resolved templates.
 
-| methods       | description                                                                                                                 |
-|---------------|-----------------------------------------------------------------------------------------------------------------------------|
+| methods            | description                                                                                                            |
+|--------------------|------------------------------------------------------------------------------------------------------------------------|
 | file.unresolved    | returns an array with two elements 0 the resolved file string 1 a list of unresolved templates                         |
 | file.readFile      | support all the features of the main file method but with the addition to suppporting file paths async returns promise |
 | file.readFileSync  | internally calls file no difference in logic                                                                           |
 | file.writeFile     | same as readFile but first param is a path which points to a location on where to write the result of the parsing      |
 | file.writeFileSync | same as writeFile but blocks the event loop                                                                            |
+
+
+## Signitures
+
+Templatizejs is smart, arguments do not have to be present but these still have
+to be in the expected order. Templatize will normalize the request based on the
+arguments order, and type, then catagroized, resolve, and order them to fit the
+signiture of the given method.
+
+| args     | description                                                                                                              |
+|----------|--------------------------------------------------------------------------------------------------------------------------|
+| writeTo  | for writeFile methods only, the location to write the results                                                            |
+| source   | the main source of data where the value injection takes place                                                            |
+| sources  | additional sources of data which data is pulled from to inject values into the main source                               |
+| start    | by default templatize uses {{ for the starting template sequence a custom sequence can be provided                       |
+| end      | by default templatize uses }} for the ending template sequence a custom sequence can be provided                         |
+| callback | callback is executed for every template which is found. The value returned from the callback is injected into the source |
+
+## callback
+
+The callback is executed for every template which is found. The value
+returned from the callback is injected into the source. 
+
+value, match, str, main, secondaries
+
+| params  | description                                                                  |
+|---------|------------------------------------------------------------------------------|
+| value   | the value found based on the template if no value found defaults to template |
+| match   | the matching template string includes the start and end template characters  |
+| str     | the full string the template was found                                       |
+| source  | the main source                                                              |
+| sources | the secondaries sources                                                      |
