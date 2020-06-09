@@ -32,6 +32,7 @@
     "type": "git",
     "url": "https://github.com/TLPcoder/templatizejs"
   },
+  "types": "types",
   "devDependencies": {
     "@types/node": "^14.0.6",
     "chai": "^4.2.0",
