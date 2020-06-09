@@ -82,7 +82,7 @@ function resolve(traverse) {
         traverse = traverseFallback
     }
 
-    return function resolver(main, secondaries, start, end, isDefault) {
+    return function resolver(main, secondaries, start, end, cb, isDefault) {
         var resolveCount = 0
 
         function replace(str) {
@@ -109,8 +109,14 @@ function resolve(traverse) {
                         ).trim()
                     }
 
+
+                    if (cb && !isDefault) {
+                        value = cb(value, match, str, main, secondaries)
+                    }
+
                     if (value !== match) {
                         resolveCount++
+
                         if (str === match) return value
                         if (typeof value === 'object') return value
                         else {
@@ -136,7 +142,7 @@ function resolve(traverse) {
         })(main)
 
         return !isDefault
-            ? resolver(main, secondaries, start, end, true)
+            ? resolver(main, secondaries, start, end, cb, true)
             : parsed
     }
 }

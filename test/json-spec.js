@@ -1,11 +1,6 @@
 var fs = require('fs')
 var chai = require('chai')
 var templatize = require('../index')
-var isNode
-
-if (process !== undefined) {
-    isNode = true
-}
 
 describe('templatize JSON', function () {
     describe('json', function() {
@@ -39,14 +34,14 @@ describe('templatize JSON', function () {
 
         it('resolve tempaltes with templates', function () {
             var main = {
-                helloworld: '{{locationHello}}{{locationWorld}}',
+                helloworld: '{{locationHello}} {{locationWorld}}',
                 locationHello: '{{hello}}',
                 locationWorld: '{{world}}',
                 hello: 'hello',
                 world: 'world'
             }
             var updated = {
-                helloworld: 'helloworld',
+                helloworld: 'hello world',
                 locationHello: 'hello',
                 locationWorld: 'world',
                 hello: 'hello',
@@ -207,55 +202,205 @@ describe('templatize JSON', function () {
             chai.expect(templatize.json(main)).deep.eq(updated)
         })
 
-        if (isNode) {
-            it('vcap application', function () {
-                var removeVCAP = setVCAPEnv()
-                var main = {
-                    appName: '{{vcap.application.name}}',
-                    uri: '{{vcap.application.uris[0]}}'
-                }
-                var updated = {
-                    appName: 'my-app',
-                    uri: 'my-app.example.com'
-                }
-                chai.expect(templatize.json(main)).deep.eq(updated)
-
-                removeVCAP()
-            })
-
-            it('vcap services', function () {
-                var removeVCAP = setVCAPEnv()
-                var main = {
-                    serviceName: '{{vcap.services.my-service.name}}',
-                    cert: '{{vcap.services.my-service.credentials.cert}}'
-                }
-                var updated = {
-                    serviceName: 'my-service',
-                    cert: 'my-cert'
-                }
-                chai.expect(templatize.json(main)).deep.eq(updated)
-
-                removeVCAP()
-            })
-
-            it('process', function () {
-                process.env.NODE_ENV = 'development'
-
-                var nodeVersion = process.version
-                var main = {
-                    nodeVersion: '{{process.version}}',
-                    env: '{{process.env.NODE_ENV}}'
-                }
-                var updated = {
-                    nodeVersion: nodeVersion,
-                    env: process.env.NODE_ENV
+        it('custom callback to handle templates', function() {
+            var main = {
+                hello: 'sad {{ world }}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
                 }
 
-                chai.expect(templatize.json(main)).deep.eq(updated)
+                return value
+            }
+            chai.expect(templatize.json(main, handle)).deep.eq(updated)
+        })
 
-                delete process.env.NODE_ENV
-            })
-        }
+        it('custom callback to handle templates with sources', function() {
+            var main = {
+                hello: 'sad {{ world }}',
+            }
+            var source = {
+                world: { covid19: 'sad world'},
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, source, handle)).deep.eq(updated)
+        })
+        
+        it('custom callback to handle templates with custom template start only', function() {
+            var main = {
+                hello: 'sad ${ world }}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, '${', handle)).deep.eq(updated)
+        })
+
+        it('custom callback to handle templates with custom templates', function() {
+            var main = {
+                hello: 'sad ${ world }',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, '${', '}', handle)).deep.eq(updated)
+        })
+
+        it('custom callback unresolved', function() {
+            var main = {
+                hello: 'sad ${ world }',
+                testing: '${nothing}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+                testing: '${nothing}',
+                world: { covid19: 'sad world'},
+                empty: null
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            var result = templatize.json.unresolved(main, '${', '}', handle)
+
+            var resolved = result[0]
+            var unresolved = result[1]
+
+            chai.expect(resolved).deep.eq(updated)
+            chai.expect(unresolved[0]).deep.eq('${nothing}')
+        })
+
+        it('custom callback to handle templates all options', function() {
+            var main = {
+                hello: 'sad ${ world }',
+            }
+            var source = {
+                world: { covid19: 'sad world'},
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, source, '${', '}', handle)).deep.eq(updated)
+        })
+
+        it('custom callback to handle templates all options', function() {
+            var main = {
+                hello: 'sad ${ world }}',
+            }
+            var source = {
+                world: { covid19: 'sad world'},
+            }
+            var updated = {
+                hello: 'sad {"covid19":"sad world"}',
+            }
+            function handle(value, match, str, main, secondaries) {
+                if (typeof value === 'object' && match !== str) {
+                    return JSON.stringify(value)
+                }
+
+                return value
+            }
+            chai.expect(templatize.json(main, source, '${', handle)).deep.eq(updated)
+        })
+
+        it('vcap application', function () {
+            var removeVCAP = setVCAPEnv()
+            var main = {
+                appName: '{{vcap.application.name}}',
+                uri: '{{vcap.application.uris[0]}}'
+            }
+            var updated = {
+                appName: 'my-app',
+                uri: 'my-app.example.com'
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+
+            removeVCAP()
+        })
+
+        it('vcap services', function () {
+            var removeVCAP = setVCAPEnv()
+            var main = {
+                serviceName: '{{vcap.services.my-service.name}}',
+                cert: '{{vcap.services.my-service.credentials.cert}}'
+            }
+            var updated = {
+                serviceName: 'my-service',
+                cert: 'my-cert'
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+            
+            removeVCAP()
+        })
+
+        it('process', function () {
+            process.env.NODE_ENV = 'development'
+
+            var nodeVersion = process.version
+            var main = {
+                nodeVersion: '{{process.version}}',
+                env: '{{process.env.NODE_ENV}}'
+            }
+            var updated = {
+                nodeVersion: nodeVersion,
+                env: process.env.NODE_ENV
+            }
+
+            chai.expect(templatize.json(main)).deep.eq(updated)
+
+            delete process.env.NODE_ENV
+        })
     })
     describe('unresolved', function() {
         it('template missing', function() {
@@ -278,292 +423,387 @@ describe('templatize JSON', function () {
             chai.expect(templates[0]).eq('{{unresolved}}')
         })
     })
-    if (isNode) {
-        describe('json files', function() {
-            it('file async main only', function(done) {
-                templatize.json.readFile(__dirname + '/test-data/test-json1.json')
-                    .then(function(json) {
-                        var updated = {
-                            hello: 'world',
-                            world: 'world'
-                        }
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('file async main + secondary', function(done) {
-                var main = __dirname + '/test-data/test-json2.json'
-                var secondary = __dirname + '/test-data/test-json3.json'
-
-                templatize.json.readFile(main, secondary)
-                    .then(function(json) {
-                        var updated = {
-                            hello: 'world'
-                        }
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('file async main "json string" + secondary', function(done) {
-                var secondary = __dirname + '/test-data/test-json3.json'
-
-                templatize.json.readFile('{"hello": "{{world}}"}', secondary)
-                    .then(function(json) {
-                        var updated = {
-                            hello: 'world'
-                        }
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('file async main + ${} template', function(done) {
-                var main = __dirname + '/test-data/test-json4.json'
-
-                templatize.json.readFile(main, '${', '}')
-                    .then(function(json) {
-                        var updated = {
-                            hello: 'world',
-                            world: 'world'
-                        }
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('file async main + secondary + ${} template', function(done) {
-                var main = __dirname + '/test-data/test-json5.json'
-                var secondary = __dirname + '/test-data/test-json3.json'
-
-                templatize.json.readFile(main, secondary, '${', '}')
-                    .then(function(json) {
-                        var updated = {
-                            hello: 'world'
-                        }
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('using file but not file paths', function(done) {
-                var main = {
-                    hello: '{{world}}',
-                    world: 'world'
-                }
-                var updated = {
-                    hello: 'world',
-                    world: 'world'
-                }
-
-                templatize.json.readFile(main)
-                    .then(function(json) {
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('using file but not file paths + secondary', function(done) {
-                var main = {
-                    hello: '{{world}}'
-                }
-                var secondary = {
-                    world: 'world'
-                }
-                var updated = {
-                    hello: 'world'
-                }
-
-                templatize.json.readFile(main, secondary)
-                    .then(function(json) {
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('using file but not file paths + secondary + different Template', function(done) {
-                var main = {
-                    hello: '${world}'
-                }
-                var secondary = {
-                    world: 'world'
-                }
-                var updated = {
-                    hello: 'world'
-                }
-
-                templatize.json.readFile(main, secondary, '${', '}')
-                    .then(function(json) {
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('using file but not file paths + secondary with both files and objects', function(done) {
-                var main = {
-                    hello: '${world}'
-                }
-                var secondaries = [
-                    {world: 'world'},
-                    __dirname + '/test-data/test-json3.json'
-                ]
-                var updated = {
-                    hello: 'world'
-                }
-
-                templatize.json.readFile(main, secondaries, '${', '}')
-                    .then(function(json) {
-                        chai.expect(json).deep.eq(updated)
-                        done()
-                    })
-            })
-            it('bad file path', function(done) {
-
-                templatize.json.readFile('/bad/path')
-                    .catch(function(err) {
-                        chai.expect(err.message).deep.eq('cant resolve /bad/path')
-                        done()
-                    })
-            })
+    describe('json files', function() {
+        it('file async main only', function(done) {
+            templatize.json.readFile(__dirname + '/test-data/test-json1.json')
+                .then(function(json) {
+                    var updated = {
+                        hello: 'world',
+                        world: 'world'
+                    }
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
         })
-        describe('json files sync', function() {
-            it('file sync main only', function() {
-                var json = templatize.json.readFileSync(__dirname + '/test-data/test-json1.json')
-                var updated = {
-                    hello: 'world',
-                    world: 'world'
-                }
-                chai.expect(json).deep.eq(updated)
-            })
-            it('file sync main + secondary', function() {
-                var main = __dirname + '/test-data/test-json2.json'
-                var secondary = __dirname + '/test-data/test-json3.json'
+        it('file async main + secondary', function(done) {
+            var main = __dirname + '/test-data/test-json2.json'
+            var secondary = __dirname + '/test-data/test-json3.json'
 
-                var json = templatize.json.readFileSync(main, secondary)
-                var updated = {
-                    hello: 'world'
-                }
-                chai.expect(json).deep.eq(updated)
-            })
-            it('file sync main + ${} template', function() {
-                var main = __dirname + '/test-data/test-json4.json'
+            templatize.json.readFile(main, secondary)
+                .then(function(json) {
+                    var updated = {
+                        hello: 'world'
+                    }
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
+        })
+        it('file async main "json string" + secondary', function(done) {
+            var secondary = __dirname + '/test-data/test-json3.json'
 
-                var json = templatize.json.readFileSync(main, '${', '}')
-                var updated = {
-                    hello: 'world',
-                    world: 'world'
-                }
-                chai.expect(json).deep.eq(updated)
-            })
-            it('file sync main + secondary + ${} template', function() {
-                var main = __dirname + '/test-data/test-json5.json'
-                var secondary = __dirname + '/test-data/test-json3.json'
+            templatize.json.readFile('{"hello": "{{world}}"}', secondary)
+                .then(function(json) {
+                    var updated = {
+                        hello: 'world'
+                    }
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
+        })
+        it('file async main + ${} template', function(done) {
+            var main = __dirname + '/test-data/test-json4.json'
 
-                var json = templatize.json.readFileSync(main, secondary, '${', '}')
-                var updated = {
-                    hello: 'world'
-                }
-                chai.expect(json).deep.eq(updated)
-            })
-            it('using file but not file paths', function() {
-                var main = {
-                    hello: '{{world}}',
-                    world: 'world'
-                }
-                var updated = {
-                    hello: 'world',
-                    world: 'world'
-                }
+            templatize.json.readFile(main, '${', '}')
+                .then(function(json) {
+                    var updated = {
+                        hello: 'world',
+                        world: 'world'
+                    }
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
+        })
+        it('file async main + secondary + ${} template', function(done) {
+            var main = __dirname + '/test-data/test-json5.json'
+            var secondary = __dirname + '/test-data/test-json3.json'
 
-                var json = templatize.json.readFileSync(main)
-                chai.expect(json).deep.eq(updated)
-            })
-            it('using file but not file paths + secondary', function() {
-                var main = {
-                    hello: '{{world}}'
-                }
-                var secondary = {
-                    world: 'world'
-                }
-                var updated = {
-                    hello: 'world'
-                }
+            templatize.json.readFile(main, secondary, '${', '}')
+                .then(function(json) {
+                    var updated = {
+                        hello: 'world'
+                    }
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
+        })
+        it('using file but not file paths', function(done) {
+            var main = {
+                hello: '{{world}}',
+                world: 'world'
+            }
+            var updated = {
+                hello: 'world',
+                world: 'world'
+            }
 
-                var json = templatize.json.readFileSync(main, secondary)
-                chai.expect(json).deep.eq(updated)
-            })
-            it('using file but not file paths + secondary + different Template', function() {
-                var main = {
-                    hello: '${world}'
-                }
-                var secondary = {
-                    world: 'world'
-                }
-                var updated = {
-                    hello: 'world'
-                }
+            templatize.json.readFile(main)
+                .then(function(json) {
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
+        })
+        it('using file but not file paths + secondary', function(done) {
+            var main = {
+                hello: '{{world}}'
+            }
+            var secondary = {
+                world: 'world'
+            }
+            var updated = {
+                hello: 'world'
+            }
 
-                var json = templatize.json.readFileSync(main, secondary, '${', '}')
-                chai.expect(json).deep.eq(updated)
-            })
-            it('using file but not file paths + secondary with both files and objects', function() {
-                var main = {
-                    hello: '${world}'
-                }
-                var secondaries = [
-                    {world: 'world'},
-                    __dirname + '/test-data/test-json3.json'
-                ]
-                var updated = {
-                    hello: 'world'
-                }
+            templatize.json.readFile(main, secondary)
+                .then(function(json) {
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
+        })
+        it('using file but not file paths + secondary + different Template', function(done) {
+            var main = {
+                hello: '${world}'
+            }
+            var secondary = {
+                world: 'world'
+            }
+            var updated = {
+                hello: 'world'
+            }
 
-                var json = templatize.json.readFileSync(main, secondaries, '${', '}')
-                chai.expect(json).deep.eq(updated)
-            })
-            it('bad file path', function() {
+            templatize.json.readFile(main, secondary, '${', '}')
+                .then(function(json) {
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
+        })
+        it('using file but not file paths + secondary with both files and objects', function(done) {
+            var main = {
+                hello: '${world}'
+            }
+            var secondaries = [
+                {world: 'world'},
+                __dirname + '/test-data/test-json3.json'
+            ]
+            var updated = {
+                hello: 'world'
+            }
 
-                try {
-                    templatize.json.readFileSync('/bad/path')
-                } catch(err) {
+            templatize.json.readFile(main, secondaries, '${', '}')
+                .then(function(json) {
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
+        })
+        it('bad file path', function(done) {
+
+            templatize.json.readFile('/bad/path')
+                .catch(function(err) {
                     chai.expect(err.message).deep.eq('cant resolve /bad/path')
-                }
-            })
+                    done()
+                })
         })
-        describe('write json file async', function() {
-            it('write file', function(done) {
-                var writeTo = __dirname + '/test-data/tmp.json'
-                var main = __dirname + '/test-data/test-json1.json'
 
-                templatize.json.writeFile(writeTo, main)
-                    .then(function(json) {
-                        var writtenFile = fs.readFileSync(writeTo, 'utf8')
-                        var updated = {
-                            hello: 'world',
-                            world: 'world'
-                        }
-
-                        chai.expect(json).deep.eq(updated)
-                        chai.expect(json).deep.eq(JSON.parse(writtenFile))
-
-                        fs.unlinkSync(writeTo)
-
-                        done()
-                    })
-            })
+        it('file async callback', function(done) {
+            var called = false
+            var callback = function (value) {
+                called = true
+                return value
+            }
+            templatize.json.readFile(__dirname + '/test-data/test-json1.json', callback)
+                .then(function(json) {
+                    var updated = {
+                        hello: 'world',
+                        world: 'world'
+                    }
+                    chai.expect(called).eq(true)
+                    chai.expect(json).deep.eq(updated)
+                    done()
+                })
         })
-        describe('write json file sync', function() {
-            it('write file', function() {
-                var writeTo = __dirname + '/test-data/tmp.json'
-                var main = __dirname + '/test-data/test-json1.json'
-
-                var json = templatize.json.writeFileSync(writeTo, main)
-                var writtenFile = fs.readFileSync(writeTo, 'utf8')
-                var updated = {
-                    hello: 'world',
-                    world: 'world'
-                }
-
-                chai.expect(json).deep.eq(updated)
-                chai.expect(json).deep.eq(JSON.parse(writtenFile))
-
-                fs.unlinkSync(writeTo)
-            })
+    })
+    describe('json files sync', function() {
+        it('file sync main only', function() {
+            var json = templatize.json.readFileSync(__dirname + '/test-data/test-json1.json')
+            var updated = {
+                hello: 'world',
+                world: 'world'
+            }
+            chai.expect(json).deep.eq(updated)
         })
-    }
+
+        it('custom callback to handle templates with sources', function() {
+            var wasCalled = false
+            var file = __dirname + '/test-data/test-json1.json'
+            var json = templatize.json.readFileSync(file, handle)
+            var updated = {
+                hello: 'world',
+                world: 'world'
+            }
+            function handle(value) {
+                wasCalled = true
+
+                return value
+            }
+            chai.expect(json).deep.eq(updated)
+            chai.expect(wasCalled).eq(true)
+        })
+        
+        it('file sync main + secondary', function() {
+            var main = __dirname + '/test-data/test-json2.json'
+            var secondary = __dirname + '/test-data/test-json3.json'
+
+            var json = templatize.json.readFileSync(main, secondary)
+            var updated = {
+                hello: 'world'
+            }
+            chai.expect(json).deep.eq(updated)
+        })
+        it('file sync main + ${} template', function() {
+            var main = __dirname + '/test-data/test-json4.json'
+
+            var json = templatize.json.readFileSync(main, '${', '}')
+            var updated = {
+                hello: 'world',
+                world: 'world'
+            }
+            chai.expect(json).deep.eq(updated)
+        })
+        it('file sync main + secondary + ${} template', function() {
+            var main = __dirname + '/test-data/test-json5.json'
+            var secondary = __dirname + '/test-data/test-json3.json'
+
+            var json = templatize.json.readFileSync(main, secondary, '${', '}')
+            var updated = {
+                hello: 'world'
+            }
+            chai.expect(json).deep.eq(updated)
+        })
+        it('using file but not file paths', function() {
+            var main = {
+                hello: '{{world}}',
+                world: 'world'
+            }
+            var updated = {
+                hello: 'world',
+                world: 'world'
+            }
+
+            var json = templatize.json.readFileSync(main)
+            chai.expect(json).deep.eq(updated)
+        })
+        it('using file but not file paths + secondary', function() {
+            var main = {
+                hello: '{{world}}'
+            }
+            var secondary = {
+                world: 'world'
+            }
+            var updated = {
+                hello: 'world'
+            }
+
+            var json = templatize.json.readFileSync(main, secondary)
+            chai.expect(json).deep.eq(updated)
+        })
+        it('using file but not file paths + secondary + different Template', function() {
+            var main = {
+                hello: '${world}'
+            }
+            var secondary = {
+                world: 'world'
+            }
+            var updated = {
+                hello: 'world'
+            }
+
+            var json = templatize.json.readFileSync(main, secondary, '${', '}')
+            chai.expect(json).deep.eq(updated)
+        })
+        it('using file but not file paths + secondary with both files and objects', function() {
+            var main = {
+                hello: '${world}'
+            }
+            var secondaries = [
+                {world: 'world'},
+                __dirname + '/test-data/test-json3.json'
+            ]
+            var updated = {
+                hello: 'world'
+            }
+
+            var json = templatize.json.readFileSync(main, secondaries, '${', '}')
+            chai.expect(json).deep.eq(updated)
+        })
+        it('bad file path', function() {
+
+            try {
+                templatize.json.readFileSync('/bad/path')
+            } catch(err) {
+                chai.expect(err.message).deep.eq('cant resolve /bad/path')
+            }
+        })
+        it('file sync callback', function() {
+            var called = false
+            var callback = function(value) {
+                called = true
+                return value
+            }
+            var json = templatize.json.readFileSync(__dirname + '/test-data/test-json1.json', callback)
+            var updated = {
+                hello: 'world',
+                world: 'world'
+            }
+            chai.expect(called).eq(true)
+            chai.expect(json).deep.eq(updated)
+        })
+    })
+    describe('write json file async', function() {
+        it('write file', function(done) {
+            var writeTo = __dirname + '/test-data/tmp.json'
+            var main = __dirname + '/test-data/test-json1.json'
+
+            templatize.json.writeFile(writeTo, main)
+                .then(function(json) {
+                    var writtenFile = fs.readFileSync(writeTo, 'utf8')
+                    var updated = {
+                        hello: 'world',
+                        world: 'world'
+                    }
+
+                    chai.expect(json).deep.eq(updated)
+                    chai.expect(json).deep.eq(JSON.parse(writtenFile))
+
+                    fs.unlinkSync(writeTo)
+
+                    done()
+                })
+        })
+        it('write file with cb', function(done) {
+            var wasCalled = false
+            var writeTo = __dirname + '/test-data/tmp.json'
+            var main = __dirname + '/test-data/test-json1.json'
+            
+            function cb(value) {
+                wasCalled = true
+                return value
+            }
+
+            templatize.json.writeFile(writeTo, main, cb)
+                .then(function(json) {
+                    var writtenFile = fs.readFileSync(writeTo, 'utf8')
+                    var updated = {
+                        hello: 'world',
+                        world: 'world'
+                    }
+
+                    chai.expect(wasCalled).deep.eq(true)
+                    chai.expect(json).deep.eq(updated)
+                    chai.expect(json).deep.eq(JSON.parse(writtenFile))
+
+                    fs.unlinkSync(writeTo)
+
+                    done()
+                })
+        })
+    })
+    describe('write json file sync', function() {
+        it('write file', function() {
+            var writeTo = __dirname + '/test-data/tmp.json'
+            var main = __dirname + '/test-data/test-json1.json'
+
+            var json = templatize.json.writeFileSync(writeTo, main)
+            var writtenFile = fs.readFileSync(writeTo, 'utf8')
+            var updated = {
+                hello: 'world',
+                world: 'world'
+            }
+
+            chai.expect(json).deep.eq(updated)
+            chai.expect(json).deep.eq(JSON.parse(writtenFile))
+
+            fs.unlinkSync(writeTo)
+        })
+        it('writesync file with cb', function() {
+            var wasCalled = false
+            var writeTo = __dirname + '/test-data/tmp.json'
+            var main = __dirname + '/test-data/test-json1.json'
+            var cb = function(value) {
+                wasCalled = true
+                return value
+            }
+            var json = templatize.json.writeFileSync(writeTo, main, cb)
+            var writtenFile = fs.readFileSync(writeTo, 'utf8')
+            var updated = {
+                hello: 'world',
+                world: 'world'
+            }
+            chai.expect(wasCalled).eq(true)
+            chai.expect(json).deep.eq(updated)
+            chai.expect(json).deep.eq(JSON.parse(writtenFile))
+
+            fs.unlinkSync(writeTo)
+        })
+    })
 })
 
 function setVCAPEnv() {
