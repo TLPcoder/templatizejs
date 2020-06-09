@@ -14,7 +14,7 @@ declare namespace json {
         start?: string,
         end?: string,
         callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
-    ): [Array<string>, Object];
+    ): [Object, Array<string>];
     function readFile(
         source: Object | string,
         sources?: Object | string | Array<Object | string>,
@@ -63,7 +63,7 @@ export declare namespace yaml {
         start?: string,
         end?: string,
         callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
-    ): [Array<string>, string];
+    ): [string, Array<string>];
     
     function readFile(
         source: string,
@@ -118,7 +118,7 @@ export declare namespace file {
         start?: string,
         end?: string,
         callback?: (value: any, match: string, str: string, source: Object, sources: Object) => any
-    ): [Array<string>, string];
+    ): [string, Array<string>];
     function readFile(
         source: string,
         sources?: Object | string | Array<Object | string>,

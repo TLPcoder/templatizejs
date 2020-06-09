@@ -1,6 +1,6 @@
 {
   "name": "templatizejs",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "bluebird": "^3.7.2",
     "cfenv": "^1.2.2",
     "ensure-array": "^1.0.0",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^3.14.0",
     "lodash.get": "^4.4.2"
   },
   "repository": {
@@ -34,10 +34,10 @@
   },
   "types": "types",
   "devDependencies": {
-    "@types/node": "^14.0.6",
+    "@types/node": "^14.0.13",
     "chai": "^4.2.0",
-    "eslint": "^7.0.0",
-    "mocha": "^7.1.2",
-    "nyc": "^15.0.1"
+    "eslint": "^7.2.0",
+    "mocha": "^7.2.0",
+    "nyc": "^15.1.0"
   }
 }
