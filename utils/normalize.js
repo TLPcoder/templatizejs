@@ -1,9 +1,7 @@
 var jsyaml = require('js-yaml')
 var ea = require('ensure-array')
-var traverse = require('./traverse')
 var fsWrapper = require('./fs-wrapper')
 var Promise = require('bluebird').Promise
-var resolve = require('./resolve-template')(traverse)
 
 var fileExist = fsWrapper.fileExist
 var readFile = fsWrapper.readFile
@@ -21,22 +19,22 @@ function isArray(a) {
     return a instanceof Array
 }
 
-function isPlainObject(o) {
+function isObject(o) {
     return (typeof o === 'object' && o !== null)
 }
 
-function parseFormat(config) {
-    if (isPlainObject(config)) {
-        return config
+function parseFormat(source) {
+    if (isObject(source)) {
+        return source
     }
 
     try {
-        return JSON.parse(config)
-    } catch (error) {
+        return JSON.parse(source)
+    } catch (err) {
         try {
-            return jsyaml.safeLoad(config)
+            return jsyaml.safeLoad(source)
         } catch (_) {
-            throw error
+            throw err
         }
     }
 }
@@ -93,10 +91,8 @@ function normalize(main, secondaries, start, end, cb) {
         cb = null
     }
 
-    if(isPlainObject(secondaries)) {
-        secondaries = ea(secondaries).map(function(e) {
-            return resolve(parseFormat(e), null, start, end, cb)
-        })
+    if(isObject(secondaries)) {
+        secondaries = ea(secondaries).map(parseFormat)
     }
 
     return [ main, secondaries, start, end, cb ]

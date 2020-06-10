@@ -118,7 +118,7 @@ function resolve(traverse) {
                         resolveCount++
 
                         if (str === match) return value
-                        if (typeof value === 'object') return value
+                        if (typeof value === 'object' && value !== null) return value
                         else {
                             str = str.replace(match, value)
 
