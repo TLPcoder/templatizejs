@@ -1,3 +1,5 @@
+var set = require('lodash.set')
+
 function match(str, start, end) {
     var hasStart = false
 
@@ -15,23 +17,26 @@ function match(str, start, end) {
 }
 
 function traverse(data, action, start, end) {
-    var references = new Map()
+    var visited = new Map()
+    var currentPath = ''
 
     function search(data) {
         if (typeof data === 'object' && data !== null) {
-            if (references.has(data)) {
-                data = references.get(data)
+            if (visited.has(data)) {
+                data = visited.get(data)
             } else {
-                references.set(data, data)
+                visited.set(data, data)
 
                 for (var key in data) {
+                    currentPath += currentPath.length ? '.' + key : key
                     data[key] = search(data[key])
+                    currentPath = currentPath.slice(0, -(key.length + 1))
                 }
             }
 
             return data
         } else if (typeof data === 'string' && match(data, start, end)) {
-            return action(data)
+            return action(data, currentPath)
         } else {
             return data
         }

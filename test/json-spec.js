@@ -1,4 +1,5 @@
 var fs = require('fs')
+var http = require('http')
 var chai = require('chai')
 var templatize = require('../index')
 
@@ -30,6 +31,86 @@ describe('templatize JSON', function () {
             }
             chai.expect(templatize.json(main)).deep.eq(updated)
             chai.expect(templatize.json(main)).eq(main)
+        })
+
+        it('multi depth', function () {
+            var main = {
+                helloworld: '{{h}}{{world}}',
+                hi: {
+                    there: {
+                        how: {
+                            are: {
+                                you: '{{feeling}}'
+                            }
+                        }
+                    }
+                },
+                feeling: 'good',
+                h: 'hello',
+                world: 'world'
+            }
+            var updated = {
+                helloworld: 'helloworld',
+                hi: {
+                    there: {
+                        how: {
+                            are: {
+                                you: 'good'
+                            }
+                        }
+                    }
+                },
+                feeling: 'good',
+                h: 'hello',
+                world: 'world'
+            }
+            chai.expect(templatize.json(main)).deep.eq(updated)
+            chai.expect(templatize.json(main)).eq(main)
+        })
+
+
+        it('circular reference', function (done) {
+            var server = http.createServer(function (req, res) {
+                try {
+                    var main = {
+                        url: '{{req.url}}',
+                        host: '{{req.headers.host}}',
+                        headers: '{{req.headers}}'
+                    }
+                    var updated = {
+                        url: '/template',
+                        host: 'localhost:3000',
+                        headers: {
+                            connection: 'close',
+                            host: 'localhost:3000'
+                        }
+                    }
+                    var resolved = templatize.json(main, { req, res })
+                    req.fullURL = 'http://{{headers.host}}{{url}}'
+                    var reqResolved = templatize.json(req)
+                    chai.expect(reqResolved.fullURL).eq('http://localhost:3000/template')
+                    chai.expect(resolved).deep.eq(updated)
+                    req.url = 'http://{{headers.host}}{{url}}'
+                    var reqResolved = templatize.json(req)
+                    // cant reference self
+                    chai.expect(reqResolved.url).eq('http://localhost:3000{{url}}')
+                    res.end('')
+                } catch(err) {
+                    server.close()
+                    done(err)
+                }
+            }).listen(3000)
+
+            http.request(require('url').parse('http://localhost:3000/template'), function(res) {
+                res.on('data', function() {})
+                res.on('end', function() {
+                    server.close()
+                    done()
+                })
+            }).on('error', function(err) {
+                console.log(err)
+            }).end()
+                
         })
 
         it('resolve tempaltes with templates', function () {
