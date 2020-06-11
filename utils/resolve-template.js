@@ -85,7 +85,7 @@ function resolve(traverse) {
     return function resolver(main, secondaries, start, end, cb, isDefault) {
         var resolveCount = 0
 
-        function replace(str) {
+        function replace(str, strLocation) {
             var stack = []
 
             for(var i = 0; i < str.length; i++) {
@@ -98,6 +98,10 @@ function resolve(traverse) {
                     var match = str.slice(opening, i + end.length)
                     var path = getPath(match, start, end)
                     var value = get(path, match, main, secondaries)
+
+                    if (path === strLocation) {
+                        return str
+                    }
 
                     if (value === match && isNode) {
                         value = resolveEnvValue(path, match)
@@ -118,7 +122,7 @@ function resolve(traverse) {
                         resolveCount++
 
                         if (str === match) return value
-                        if (typeof value === 'object') return value
+                        if (typeof value === 'object' && value !== null) return value
                         else {
                             str = str.replace(match, value)
 
